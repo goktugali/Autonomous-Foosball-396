@@ -1,0 +1,3 @@
+/home/pi/projects/fball_project/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/pi/projects/fball_project/cmake-build-debug/CMakeFiles/fball.dir
+/home/pi/projects/fball_project/cmake-build-debug/CMakeFiles/edit_cache.dir

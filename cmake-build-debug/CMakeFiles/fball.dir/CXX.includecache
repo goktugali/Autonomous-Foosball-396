@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/pi/projects/fball_project/main.cpp
+iostream
+-
+opencv2/imgproc.hpp
+-
+opencv2/core.hpp
+-
+pigpiod_if2.h
+-
+

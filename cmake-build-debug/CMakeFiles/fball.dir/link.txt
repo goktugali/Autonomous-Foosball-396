@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/fball.dir/main.cpp.o  -o fball 
