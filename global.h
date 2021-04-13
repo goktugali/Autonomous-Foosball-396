@@ -5,7 +5,16 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-typedef struct global{
+#include <unistd.h>
+#include <cstdlib>
+#include <cstdio>
+#include <pigpiod_if2.h>
+#include "defines.h"
+
+typedef struct __Global_t{
+
+    int             pi;
+    stepper_t       all_steppers[ROBOT_ARM_NUM];
 
 }Global_t;
 
