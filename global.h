@@ -14,7 +14,7 @@
 typedef struct __Global_t{
 
     int             pi;
-    stepper_t       all_steppers[ROBOT_ARM_NUM];
+    stepper_t       all_steppers[STEPPER_NUM];
 
 }Global_t;
 
