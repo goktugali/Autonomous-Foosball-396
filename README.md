@@ -1,5 +1,4 @@
-# Autonomous Foosball Robot
-## CSE396 Autonomous Foosball Robot Project
+# CSE396 Autonomous Foosball Robot Project
 
 This repository contains the embedded source code of the Autonomous Foosball Robot Project.
 ## Contributors
