@@ -1,4 +1,4 @@
-#include "stepper_driver.h"
+#include "motor_driver.h"
 
 stepper_t init_stepper(int step_pin, int dir_pin)
 {
@@ -83,18 +83,48 @@ void arm_move(stepper_t* step_motor,  uint16_t target_pos)
     stepper_set_position(step_motor, target_pos);
 }
 
+void arm_home(stepper_t* step_motor)
+{
+    stepper_home(step_motor);
+}
+
 void arm_move_sync(uint16_t target_pos)
 {
     stepper_set_position(&Global.all_steppers[STEPPER_SNT], target_pos);
     Global.all_steppers[STEPPER_GK].position = Global.all_steppers[STEPPER_SNT].position;
 }
 
-void arm_home(stepper_t* step_motor)
-{
-    stepper_home(step_motor);
-}
+
 void arm_home_sync()
 {
     stepper_home(&Global.all_steppers[STEPPER_SNT]);
     Global.all_steppers[STEPPER_GK].position = 0;
+}
+
+void servo_SNT_home()
+{
+    set_servo_pulsewidth(Global.pi, SERVO_SNT_SIGNAL_PIN, SERVO_SNT_HOME_POSITION);
+    usleep(500000);
+}
+
+void servo_SNT_kick()
+{
+    set_servo_pulsewidth(Global.pi, SERVO_SNT_SIGNAL_PIN, SERVO_SNT_HOME_POSITION - SERVO_KICK_DISTANCE);
+    usleep(200000);
+    set_servo_pulsewidth(Global.pi, SERVO_SNT_SIGNAL_PIN, SERVO_SNT_HOME_POSITION);
+    usleep(200000);
+}
+
+void servo_GK_home()
+{
+    set_servo_pulsewidth(Global.pi, SERVO_GK_SIGNAL_PIN, SERVO_GK_HOME_POSITION);
+    usleep(500000);
+}
+
+void servo_GK_kick()
+{
+    set_servo_pulsewidth(Global.pi, SERVO_GK_SIGNAL_PIN, SERVO_GK_HOME_POSITION - SERVO_KICK_DISTANCE);
+    usleep(200000);
+    set_servo_pulsewidth(Global.pi, SERVO_GK_SIGNAL_PIN, SERVO_GK_HOME_POSITION);
+    usleep(200000);
 }

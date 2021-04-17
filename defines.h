@@ -10,23 +10,26 @@
 
 /************ GPIO PIN DEFINES ***********/
 #define ENDSTOP_ARM_SNT_PIN             16
-#define ENDSTOP_ARM_GK_PIN              99999
 #define STEPPER_ARM_SNT_STEP_PIN        20
 #define STEPPER_ARM_SNT_DIR_PIN         21
-#define STEPPER_ARM_GK_STEP_PIN         23
-#define STEPPER_ARM_GK_DIR_PIN          24
-
+#define STEPPER_ARM_GK_STEP_PIN         23 // Devre disi
+#define STEPPER_ARM_GK_DIR_PIN          24 // Devre disi
+#define SERVO_SNT_SIGNAL_PIN            27
+#define SERVO_GK_SIGNAL_PIN             22
 
 /************ GPIO PIN DEFINES ***********/
 
 
 /************ TYPE DEFINES **************/
+
+/* Step Motor Struct */
 typedef struct __stepper_t{
     int         step_pin;
     int         dir_pin;
     uint16_t    position;
 }stepper_t;
 
+/* Arayuze gonderilecek data paketi */
 typedef struct __hardware_data_pckt_t{
     uint16_t    stepper_gk_position;
     uint16_t    stepper_snt_position;
@@ -47,7 +50,13 @@ typedef enum {
     STEPPER_GK = 0,
     STEPPER_SNT,
     STEPPER_NUM
-}ROBOT_ARMS;
+}STEPPER_ID;
+
+typedef enum {
+    SERVO_GK = 0,
+    SERVO_SNT,
+    SERVO_NUM
+}SERVO_ID;
 /************ ENUMARATIONS **************/
 
 
