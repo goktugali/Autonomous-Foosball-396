@@ -18,4 +18,12 @@ void global_init()
     // init snt arm end stop switch pin
     set_mode(Global.pi, ENDSTOP_ARM_SNT_PIN, PI_INPUT);
     set_pull_up_down(Global.pi, ENDSTOP_ARM_SNT_PIN, PI_PUD_UP);
+
+
+    /* sync stuff */
+    pthread_mutex_init(&Global.game_position_mutex, NULL);
+    pthread_mutex_init(&Global.servo_track_mutex, NULL);
+    pthread_cond_init(&Global.servo_track_condvar, NULL);
+
+    Global.target_kick_servo = -1;
 }

@@ -13,8 +13,22 @@
 
 typedef struct __Global_t{
 
-    int             pi;
-    stepper_t       all_steppers[STEPPER_NUM];
+    int                     pi;
+    stepper_t               all_steppers[STEPPER_NUM];
+
+    /* game variables */
+    int16_t                 ball_position_x;
+    int16_t                 ball_position_y;
+    int                     target_kick_servo;
+
+    /* Threads */
+    pthread_t               ball_tracker_thread;
+    pthread_t               servo_kicker_thread;
+
+    /* sync stuff */
+    pthread_mutex_t         game_position_mutex;
+    pthread_mutex_t         servo_track_mutex;
+    pthread_cond_t          servo_track_condvar;
 
 }Global_t;
 

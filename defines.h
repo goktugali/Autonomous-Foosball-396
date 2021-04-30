@@ -20,6 +20,28 @@
 /************ GPIO PIN DEFINES ***********/
 
 
+/********* BALL TRACKER DEFINES **********/
+// Todo : Fix here.
+#define imageLowH                       90
+#define imageHighH                      130
+
+#define imageLowS                       130
+#define imageHighS                      255
+
+#define imageLowV                       95
+#define imageHighV                      255
+/********* BALL TRACKER DEFINES **********/
+
+
+/********** SIZE DEFINES ****************/
+#define FIELD_Y_LENGTH                      664
+#define DISTANCE_BETWEEN_KICKERS            166
+#define SNT_KICK_DISTANCE_MAX               400
+#define SNT_KICK_DISTANCE_MIN               370
+#define GK_KICK_DISTANCE_MAX                75
+#define GK_KICK_DISTANCE_MIN                48
+/********** SIZE DEFINES ****************/
+
 /************ TYPE DEFINES **************/
 
 /* Step Motor Struct */
