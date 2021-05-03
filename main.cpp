@@ -17,9 +17,11 @@ int main()
     arm_home_sync();
     init_camera_params();
     start_servo_kicker_thread();
+    arm_move_sync(166);
 
     // Todo : play game another thread.
     // Todo : implement server thread.
+    sleep(2);
     while(true)
     {
         uint16_t ball_x;
@@ -27,11 +29,14 @@ int main()
         get_ball_position(&ball_x, &ball_y);
         cout << " Ball Position : " << "(" << ball_x << "," << ball_y << ")" << endl;
         uint16_t stepper_pos = Global.all_steppers[STEPPER_SNT].position;
-        align_arms(ball_y, stepper_pos);
 
-        int servo = is_kick_need(ball_x);
-        if(-1 != servo)
-            trigger_servo(servo);
+        pthread_mutex_lock(&Global.ball_info_mutex);
+        Global.ball_position_x = ball_x;
+        Global.ball_position_y = ball_y;
+        pthread_mutex_unlock(&Global.ball_info_mutex);
+
+        align_arms(ball_x, ball_y, stepper_pos);
+        align_servo_positions(ball_x);
     }
 
     return 0;

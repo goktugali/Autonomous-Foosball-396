@@ -34,12 +34,14 @@
 
 
 /********** SIZE DEFINES ****************/
-#define FIELD_Y_LENGTH                      664
-#define DISTANCE_BETWEEN_KICKERS            166
+#define FIELD_Y_LENGTH                      330
+#define DISTANCE_BETWEEN_KICKERS            83
 #define SNT_KICK_DISTANCE_MAX               400
-#define SNT_KICK_DISTANCE_MIN               370
+#define SNT_KICK_DISTANCE_MIN               375
 #define GK_KICK_DISTANCE_MAX                75
 #define GK_KICK_DISTANCE_MIN                48
+#define DEFENCE_POSITON_MAX                 225
+#define DEFENCE_POSITION_MIN                205
 /********** SIZE DEFINES ****************/
 
 /************ TYPE DEFINES **************/
@@ -79,6 +81,12 @@ typedef enum {
     SERVO_SNT,
     SERVO_NUM
 }SERVO_ID;
+
+typedef enum {
+    SERVO_KICK = 0,
+    SERVO_UP,
+    KICK_TYPE_NUM
+}KICK_TYPE;
 /************ ENUMARATIONS **************/
 
 

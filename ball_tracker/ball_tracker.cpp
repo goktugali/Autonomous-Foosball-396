@@ -2,7 +2,7 @@
 #include "ball_tracker.h"
 #include "../control.h"
 
-const bool predictKick = false;
+const bool predictKick = true;
 
 // Camera frame
 cv::Mat frame;
@@ -31,6 +31,8 @@ int notFoundCount = 0;
 
 cv::Point foundResult;
 cv::Point predictResult;
+
+//VideoWriter video("/home/pi/Desktop/out.avi",VideoWriter::fourcc('M','J','P','G'),10, Size(640,480),true);
 
 int init_camera_params()
 {
@@ -108,8 +110,16 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
         if (predictKick)
         {
             int servo = is_kick_need(center.x);
-            if(-1 != servo)
-                trigger_servo(servo);
+            if(servo == SERVO_SNT){
+                int pulse_width = get_servo_pulsewidth(Global.pi, SERVO_SNT_SIGNAL_PIN);
+                if(SERVO_SNT_HOME_POSITION - SERVO_KICK_DISTANCE != pulse_width)
+                    trigger_servo_kick(servo);
+            }
+            else if(servo == SERVO_GK){
+                int pulse_width = get_servo_pulsewidth(Global.pi, SERVO_GK_SIGNAL_PIN);
+                if(SERVO_GK_HOME_POSITION - SERVO_KICK_DISTANCE != pulse_width)
+                    trigger_servo_kick(servo);
+            }
         }
 
         cv::circle(res, center, 2, CV_RGB(255,0,0), -1);
@@ -129,7 +139,7 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
     // >>>>> Color Thresholding
     // Note: change parameters for different colors
     cv::Mat rangeRes = cv::Mat::zeros(frame.size(), CV_8UC1);
-    cv::inRange(frmHsv, cv::Scalar(90, 140, 60),
+    cv::inRange(frmHsv, cv::Scalar(90, 100, 60),
                 cv::Scalar(120 , 255, 255), rangeRes);
     // <<<<< Color Thresholding
 
@@ -235,6 +245,7 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
         else
             kf.correct(meas); // Kalman Correction
     }
+    //video.write(res);
     // <<<<< Kalman Update
     normalize_coordinates(foundResult, ball_pos_x, ball_pos_y);
 }
@@ -246,7 +257,8 @@ void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, u
     use this formula (val - A)*(b-a)/(B-A) + a
      */
 
-    int calculated_y_pos = 390 - (foundResult.y - 47);
+    int calculated_y_pos = foundResult.y;
+    calculated_y_pos = abs(437 - calculated_y_pos);
     calculated_y_pos = (calculated_y_pos) * (FIELD_Y_LENGTH) / 390;
 
     if(calculated_y_pos < 0 )

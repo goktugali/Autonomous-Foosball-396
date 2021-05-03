@@ -8,6 +8,7 @@
 #include "../global.h"
 #include "../defines.h"
 #include <pigpiod_if2.h>
+#include <pthread.h>
 
 /**************** TANIMLAMALAR *****************/
 #define DEGREE_TO_STEPS(x) (6400*x / 360)

@@ -21,9 +21,11 @@ void global_init()
 
 
     /* sync stuff */
-    pthread_mutex_init(&Global.game_position_mutex, NULL);
     pthread_mutex_init(&Global.servo_track_mutex, NULL);
+    pthread_mutex_init(&Global.servo_snt_mutex, NULL);
+    pthread_mutex_init(&Global.ball_info_mutex, NULL);
     pthread_cond_init(&Global.servo_track_condvar, NULL);
 
     Global.target_kick_servo = -1;
+    Global.servo_prev_state  = 1;
 }

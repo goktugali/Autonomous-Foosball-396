@@ -12,6 +12,7 @@ stepper_t init_stepper(int step_pin, int dir_pin)
 
 void generate_ramp(int step_pin, int ramp0, int ramp1)
 {
+
     int wid = -1;
     int f = ramp0;
     int micros = (int)(500000/f);
@@ -25,8 +26,8 @@ void generate_ramp(int step_pin, int ramp0, int ramp1)
     int y = steps >> 8;
     char wave[7] = {255, 0, wid, 255, 1 , x, y};
     wave_chain(Global.pi, wave , 7);
-    while(wave_tx_busy(Global.pi));
 
+    while(wave_tx_busy(Global.pi));
     wave_delete(Global.pi, wid);
 }
 
@@ -39,20 +40,27 @@ void stepper_go(const stepper_t* step_motor, STEP_DIRECTON dir, int speed, int s
 
 void stepper_set_position(stepper_t* step_motor, uint16_t target_pos)
 {
-    if(target_pos == step_motor->position || target_pos > FIELD_Y_LENGTH / 2 || target_pos < 0)
+    if(target_pos == step_motor->position || target_pos > FIELD_Y_LENGTH || target_pos < 0)
+        return;
+
+    if(abs(target_pos - step_motor->position) < 10)
         return;
 
     if(target_pos > step_motor->position)
     {
         int travel_distance = (target_pos- step_motor->position) * STEPPER_POS_MULTIPLIER;
-        printf("distance : %d\n", travel_distance);
-        int needed_speed    = 5000 + travel_distance / 1.2;
+        int needed_speed    = 7000 + travel_distance / 0.4;
         stepper_go(step_motor, STEP_DIR_CCW, needed_speed, travel_distance);
     }
     else
     {
+        // Endstop touch check.
+        if(0 == gpio_read(Global.pi, ENDSTOP_ARM_SNT_PIN)) {
+            return;
+        }
+
         int travel_distance = (step_motor->position - target_pos) * STEPPER_POS_MULTIPLIER;
-        int needed_speed    = 5000 + travel_distance / 1.2;
+        int needed_speed    = 7000 + travel_distance / 0.4;
         stepper_go(step_motor, STEP_DIR_CW, needed_speed, travel_distance);
     }
 
@@ -109,10 +117,17 @@ void servo_SNT_home()
 
 void servo_SNT_kick()
 {
+    pthread_mutex_lock(&Global.servo_snt_mutex);
+    if(get_servo_pulsewidth(Global.pi, SERVO_SNT_SIGNAL_PIN) != SERVO_SNT_HOME_POSITION) {
+        set_servo_pulsewidth(Global.pi, SERVO_SNT_SIGNAL_PIN, SERVO_SNT_HOME_POSITION);
+        usleep(100000);
+    }
+
     set_servo_pulsewidth(Global.pi, SERVO_SNT_SIGNAL_PIN, SERVO_SNT_HOME_POSITION - SERVO_KICK_DISTANCE);
-    usleep(150000);
+    usleep(100000);
     set_servo_pulsewidth(Global.pi, SERVO_SNT_SIGNAL_PIN, SERVO_SNT_HOME_POSITION);
-    usleep(150000);
+    usleep(100000);
+    pthread_mutex_unlock(&Global.servo_snt_mutex);
 }
 
 void servo_GK_home()
@@ -124,7 +139,7 @@ void servo_GK_home()
 void servo_GK_kick()
 {
     set_servo_pulsewidth(Global.pi, SERVO_GK_SIGNAL_PIN, SERVO_GK_HOME_POSITION - SERVO_KICK_DISTANCE);
-    usleep(150000);
+    usleep(100000);
     set_servo_pulsewidth(Global.pi, SERVO_GK_SIGNAL_PIN, SERVO_GK_HOME_POSITION);
-    usleep(150000);
+    usleep(100000);
 }
