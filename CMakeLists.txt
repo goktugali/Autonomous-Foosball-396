@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 project(fball)
 
 set(CMAKE_CXX_STANDARD 11)
-FILE(GLOB TARGET_H "${CMAKE_SOURCE_DIR}/*.h" "motor_driver/*.h" "ball_tracker/*.h")
-FILE(GLOB TARGET_CPP "${CMAKE_SOURCE_DIR}/*.cpp" "motor_driver/*.cpp" "ball_tracker/*.cpp")
+FILE(GLOB TARGET_H "${CMAKE_SOURCE_DIR}/*.h" "motor_driver/*.h" "ball_tracker/*.h" "desktop_comm/*.h")
+FILE(GLOB TARGET_CPP "${CMAKE_SOURCE_DIR}/*.cpp" "motor_driver/*.cpp" "ball_tracker/*.cpp" "desktop_comm/*.cpp")
 
 SET(TARGET_SRC ${TARGET_H} ${TARGET_CPP} )
 

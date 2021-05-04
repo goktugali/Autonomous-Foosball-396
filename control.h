@@ -18,5 +18,7 @@ void trigger_servo_kick(int servo_num);
 void align_servo_positions(uint16_t ball_x);
 void* stepper_aligner_thread_func(void* arg);
 void start_stepper_aligner();
+void* ball_tracker_warning_thread_func(void* arg);
+void start_ball_tracker_warning_thread();
 
 #endif

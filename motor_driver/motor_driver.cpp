@@ -40,16 +40,16 @@ void stepper_go(const stepper_t* step_motor, STEP_DIRECTON dir, int speed, int s
 
 void stepper_set_position(stepper_t* step_motor, uint16_t target_pos)
 {
-    if(target_pos == step_motor->position || target_pos > FIELD_Y_LENGTH || target_pos < 0)
+    if(target_pos == step_motor->position || target_pos > STEPPER_MAX_POSITION || target_pos < STEPPER_MIN_POSITION)
         return;
 
-    if(abs(target_pos - step_motor->position) < 10)
+    if(abs(target_pos - step_motor->position) < 5)
         return;
 
     if(target_pos > step_motor->position)
     {
         int travel_distance = (target_pos- step_motor->position) * STEPPER_POS_MULTIPLIER;
-        int needed_speed    = 7000 + travel_distance / 0.4;
+        int needed_speed    = 5000 + travel_distance * 2;
         stepper_go(step_motor, STEP_DIR_CCW, needed_speed, travel_distance);
     }
     else
@@ -60,7 +60,7 @@ void stepper_set_position(stepper_t* step_motor, uint16_t target_pos)
         }
 
         int travel_distance = (step_motor->position - target_pos) * STEPPER_POS_MULTIPLIER;
-        int needed_speed    = 7000 + travel_distance / 0.4;
+        int needed_speed    = 5000 + travel_distance * 2;
         stepper_go(step_motor, STEP_DIR_CW, needed_speed, travel_distance);
     }
 
@@ -82,8 +82,7 @@ void stepper_home(stepper_t* step_motor)
     while(gpio_read(Global.pi, ENDSTOP_ARM_SNT_PIN) != 1);
 
     set_PWM_dutycycle(Global.pi, step_motor->step_pin, 0);
-    stepper_set_position(step_motor, 5);
-    step_motor->position = 0;
+    step_motor->position = STEPPER_MIN_POSITION;
 }
 
 void arm_move(stepper_t* step_motor,  uint16_t target_pos)

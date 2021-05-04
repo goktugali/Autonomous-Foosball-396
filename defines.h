@@ -16,6 +16,7 @@
 #define STEPPER_ARM_GK_DIR_PIN          24 // Devre disi
 #define SERVO_SNT_SIGNAL_PIN            27
 #define SERVO_GK_SIGNAL_PIN             22
+#define RED_LED_PIN                     4
 
 /************ GPIO PIN DEFINES ***********/
 
@@ -34,15 +35,26 @@
 
 
 /********** SIZE DEFINES ****************/
-#define FIELD_Y_LENGTH                      330
-#define DISTANCE_BETWEEN_KICKERS            83
-#define SNT_KICK_DISTANCE_MAX               400
-#define SNT_KICK_DISTANCE_MIN               375
-#define GK_KICK_DISTANCE_MAX                75
-#define GK_KICK_DISTANCE_MIN                48
-#define DEFENCE_POSITON_MAX                 225
-#define DEFENCE_POSITION_MIN                205
+#define STEPPER_MAX_POSITION                              320
+#define STEPPER_MIN_POSITION                        168
+#define DISTANCE_BETWEEN_KICKERS                    113
+#define SNT_KICK_DISTANCE_MAX                       400
+#define SNT_KICK_DISTANCE_MIN                       375
+#define GK_KICK_DISTANCE_MAX                        75
+#define GK_KICK_DISTANCE_MIN                        48
+#define DEFENCE_POSITON_MAX                         225
+#define DEFENCE_POSITION_MIN                        205
+#define STEPPER_HOME_IMAGE_POSITION_CONSTANT               45
+#define STEPPER_ERROR_CONSTANT                      20
 /********** SIZE DEFINES ****************/
+
+
+/************* COMM DEFINES *****************/
+#define MULTICAST_GROUP_IP                  "234.5.5.5"
+#define MULTICAST_PORT                      10200
+#define DESKTOP_COMM_FREQUENCY              500000
+#define COMM_DATA_PACKET_SIZE               6  // 6*16 = 96byte
+/************* COMM DEFINES *****************/
 
 /************ TYPE DEFINES **************/
 
@@ -58,16 +70,16 @@ typedef struct __hardware_data_pckt_t{
     uint16_t    stepper_gk_position;
     uint16_t    stepper_snt_position;
     uint16_t    ball_position;
-    uint8_t     robot_score;
-    uint8_t     human_score;
+    uint16_t     robot_score;
+    uint16_t     human_score;
 }hardware_data_pckt_t;
 
 /************ TYPE DEFINES **************/
 
 /************ ENUMARATIONS **************/
 typedef enum{
-    STEP_DIR_CW = 0,
-    STEP_DIR_CCW
+    STEP_DIR_CCW = 0,
+    STEP_DIR_CW
 }STEP_DIRECTON;
 
 typedef enum {
@@ -87,6 +99,13 @@ typedef enum {
     SERVO_UP,
     KICK_TYPE_NUM
 }KICK_TYPE;
+
+typedef enum {
+    MULTICAST_STATE_STREAMING = 0,
+    MULTICAST_STATE_STOPPED,
+    MULTICAST_STATE_STOP_REQUESTED,
+    MULTICAST_STATE_NUM
+}MULTICAST_STREAM_STATE;
 /************ ENUMARATIONS **************/
 
 

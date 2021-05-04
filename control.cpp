@@ -14,13 +14,12 @@ void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
             arm_move_sync((FIELD_Y_LENGTH / 2));
         return;
     }
-
      */
 
     int16_t differences[3];
-    uint16_t first_kicker_pos   = stepper_pos / 2;
-    uint16_t second_kicker_pos  = first_kicker_pos + DISTANCE_BETWEEN_KICKERS;
-    uint16_t third_kicker_pos   = second_kicker_pos + DISTANCE_BETWEEN_KICKERS;
+    uint16_t second_kicker_pos  = stepper_pos;
+    uint16_t first_kicker_pos   = stepper_pos - DISTANCE_BETWEEN_KICKERS;
+    uint16_t third_kicker_pos   = stepper_pos + DISTANCE_BETWEEN_KICKERS;
 
     uint16_t target_pos;
     int16_t min_difference;
@@ -35,30 +34,33 @@ void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
     /* sort the differences */
     sort_diff(differences);
     printf("Motor pos : %d\n", stepper_pos);
+    printf("Birinci adam konum : %d\n", first_kicker_pos);
+    printf("ikinci adam konum : %d\n", second_kicker_pos)
+    ;
+    printf("ucuncu adam konum : %d\n", third_kicker_pos);
     for (int i = 0; i < 3; ++i)
     {
         if(differences[i] == difference_first_kicker)
         {
             printf("En yakin birinci adam \n");
+
             printf("Birinci adam mesafe : %d\n", differences[i]);
-            printf("Birinci adam konum : %d\n", first_kicker_pos);
             if(first_kicker_pos < ball_y)
             {
-                target_pos = first_kicker_pos + differences[i];
+                target_pos = second_kicker_pos + differences[i];
             }
             else
             {
-                target_pos = first_kicker_pos - differences[i];
+                target_pos = second_kicker_pos - differences[i];
             }
 
-            target_pos = target_pos*2;
         }
         else if(differences[i] == difference_second_kicker)
         {
 
             printf("En yakin ikinci adam \n");
             printf("ikinci adam mesafe : %d\n", differences[i]);
-            printf("ikinci adam konum : %d\n", second_kicker_pos);
+
             if(second_kicker_pos < ball_y)
             {
                 target_pos = second_kicker_pos + differences[i];
@@ -67,26 +69,23 @@ void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
             {
                 target_pos = second_kicker_pos - differences[i];
             }
-            target_pos = (target_pos - DISTANCE_BETWEEN_KICKERS)*2;
         }
         else if(differences[i] == difference_third_kicker)
         {
             printf("En yakin ucuncu adam \n");
             printf("ucuncu adam mesafe : %d\n", differences[i]);
-            printf("ucuncu adam konum : %d\n", third_kicker_pos);
+
             if(third_kicker_pos < ball_y)
             {
-                target_pos = third_kicker_pos + differences[i];
+                target_pos = second_kicker_pos + differences[i];
             }
             else
             {
-                target_pos = third_kicker_pos - differences[i];
+                target_pos = second_kicker_pos - differences[i];
             }
-
-            target_pos = (target_pos - (2* DISTANCE_BETWEEN_KICKERS))*2;
         }
 
-        if(target_pos >= 0 && target_pos <= FIELD_Y_LENGTH) {
+        if(target_pos > STEPPER_MIN_POSITION && target_pos < STEPPER_MAX_POSITION) {
             printf("Hareket komutu gonderildi %d \n", target_pos);
             arm_move_sync(target_pos);
             break;
@@ -179,4 +178,32 @@ void sort_diff(int16_t* diffs)
         diffs[min_idx] = diffs[i];
         diffs[i] = temp;
     }
+}
+
+void* ball_tracker_warning_thread_func(void* arg)
+{
+    while(true)
+    {
+        pthread_mutex_lock(&Global.ball_warning_mutex);
+        if(!Global.ball_not_found) {
+            pthread_cond_wait(&Global.ball_warning_condvar, &Global.ball_warning_mutex);
+        }
+        pthread_mutex_unlock(&Global.ball_warning_mutex);
+
+        gpio_write(Global.pi, RED_LED_PIN, PI_HIGH);
+        usleep(75000);
+        gpio_write(Global.pi, RED_LED_PIN, PI_LOW);
+        usleep(75000);
+
+        gpio_write(Global.pi, RED_LED_PIN, PI_HIGH);
+        usleep(75000);
+        gpio_write(Global.pi, RED_LED_PIN, PI_LOW);
+        usleep(75000);
+
+        usleep(1750000);
+    }
+}
+void start_ball_tracker_warning_thread()
+{
+    pthread_create(&Global.ball_tracker_warning_thread, NULL, &ball_tracker_warning_thread_func, NULL);
 }

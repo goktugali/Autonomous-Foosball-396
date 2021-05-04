@@ -27,7 +27,6 @@ char ch = 0;
 double ticks = 0;
 bool found = false;
 int notFoundCount = 0;
-// >>>>> Main loop
 
 cv::Point foundResult;
 cv::Point predictResult;
@@ -208,10 +207,19 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
         if( notFoundCount >= 100 )
         {
             found = false;
+            pthread_mutex_lock(&Global.ball_warning_mutex);
+            Global.ball_not_found = 1;
+            pthread_cond_signal(&Global.ball_warning_condvar);
+            pthread_mutex_unlock(&Global.ball_warning_mutex);
         }
     }
     else
     {
+        /* Turn Off Led */
+        pthread_mutex_lock(&Global.ball_warning_mutex);
+        Global.ball_not_found = 0;
+        pthread_mutex_unlock(&Global.ball_warning_mutex);
+
         // Todo: Handle not found situation. Use global for this state.
         notFoundCount = 0;
 
@@ -258,10 +266,14 @@ void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, u
      */
 
     int calculated_y_pos = foundResult.y;
-    calculated_y_pos = abs(437 - calculated_y_pos);
-    calculated_y_pos = (calculated_y_pos) * (FIELD_Y_LENGTH) / 390;
+    //calculated_y_pos = abs(430 - calculated_y_pos);
+    printf("Calculated pos : %d\n", calculated_y_pos);
+    *ball_pos_y = 435 - (calculated_y_pos - 45);
+    //calculated_y_pos = (calculated_y_pos) * (FIELD_Y_LENGTH) / 390;
 
-    if(calculated_y_pos < 0 )
+
+    /*
+    if(calculated_y_pos < 0)
     {
         *ball_pos_y = 0;
     }
@@ -273,7 +285,7 @@ void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, u
     {
         *ball_pos_y = calculated_y_pos;
     }
-
+*/
     int calculated_x_pos = foundResult.x - 11;
     if(calculated_x_pos < 0 ){
         *ball_pos_x = 0;
