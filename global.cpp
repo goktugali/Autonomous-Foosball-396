@@ -1,5 +1,5 @@
-#include "global.h"
-#include "motor_driver/motor_driver.h"
+#include "global.hpp"
+#include "motor_driver/motor_driver.hpp"
 
 Global_t Global;
 
@@ -21,8 +21,9 @@ void global_init()
     set_mode(Global.pi, ENDSTOP_ARM_SNT_PIN, PI_INPUT);
     set_pull_up_down(Global.pi, ENDSTOP_ARM_SNT_PIN, PI_PUD_UP);
 
-    // init led pin
+    // init led pin, initially led is high
     set_mode(Global.pi, RED_LED_PIN, PI_OUTPUT);
+    gpio_write(Global.pi, RED_LED_PIN, PI_HIGH);
 
     /************************** GPIO PIN INIT *******************************/
 
@@ -32,18 +33,29 @@ void global_init()
     pthread_mutex_init(&Global.ball_info_mutex, NULL);
     pthread_mutex_init(&Global.ball_warning_mutex, NULL);
     pthread_mutex_init(&Global.multicast_stream_state_mutex ,NULL);
+    pthread_mutex_init(&Global.game_state_mutex, NULL);
+    pthread_mutex_init(&Global.servo_kicker_state_mutex, NULL);
+    pthread_mutex_init(&Global.ball_warning_thread_state_mutex, NULL);
+    pthread_mutex_init(&Global.db_json_file_mutex, NULL);
+    pthread_mutex_init(&Global.current_match_data_mutex, NULL);
     pthread_cond_init(&Global.servo_track_condvar, NULL);
     pthread_cond_init(&Global.ball_warning_condvar, NULL);
     /************************* SYNCHRONIZATION STUFF ***********************/
 
     /************************* NETWORKING STUFF ****************************/
-    Global.multicast_socket_fd = -1;
-    Global.multicast_stream_state = MULTICAST_STATE_STOPPED;
+    Global.multicast_socket_fd      = -1;
+    Global.main_server_socket_fd    = -1;
     /************************* NETWORKING STUFF ****************************/
+
+    /************************* STATE VARIABLES ****************************/
+    Global.multicast_stream_state       = STATE_STOPPED;
+    Global.game_play_state              = STATE_STOPPED;
+    Global.servo_kicker_state           = STATE_STOPPED;
+    Global.ball_warning_thread_state    = STATE_STOPPED;
+    /************************* STATE VARIABLES ****************************/
 
     /************************* OTHER VARIABLES ******************************/
     Global.target_kick_servo = -1;
     Global.ball_not_found    = 1;
-
     /************************* OTHER VARIABLES ******************************/
 }

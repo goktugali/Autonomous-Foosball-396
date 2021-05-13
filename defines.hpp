@@ -52,8 +52,10 @@
 /************* COMM DEFINES *****************/
 #define MULTICAST_GROUP_IP                  "234.5.5.5"
 #define MULTICAST_PORT                      10200
+#define MAIN_SERVER_PORT                    7080
 #define DESKTOP_COMM_FREQUENCY              500000
-#define COMM_DATA_PACKET_SIZE               6  // 6*16 = 96byte
+#define COMM_DATA_PACKET_SIZE               6  //  = 12byte
+#define JSON_DATABASE_FILE_PATH                  "/home/pi/Desktop/database/database.json"
 /************* COMM DEFINES *****************/
 
 /************ TYPE DEFINES **************/
@@ -73,6 +75,12 @@ typedef struct __hardware_data_pckt_t{
     uint16_t     robot_score;
     uint16_t     human_score;
 }hardware_data_pckt_t;
+
+typedef struct __match_data{
+    char date[24];
+    char human_score[5];
+    char robot_score[5];
+}match_data_t;
 
 /************ TYPE DEFINES **************/
 
@@ -100,12 +108,13 @@ typedef enum {
     KICK_TYPE_NUM
 }KICK_TYPE;
 
-typedef enum {
-    MULTICAST_STATE_STREAMING = 0,
-    MULTICAST_STATE_STOPPED,
-    MULTICAST_STATE_STOP_REQUESTED,
-    MULTICAST_STATE_NUM
-}MULTICAST_STREAM_STATE;
+typedef enum{
+    STATE_PLAYING = 0,
+    STATE_STOPPED,
+    STATE_STOP_REQUESTED,
+    STATE_NUM
+}PLAY_STATE;
+
 /************ ENUMARATIONS **************/
 
 

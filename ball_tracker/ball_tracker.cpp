@@ -1,6 +1,6 @@
 #include <opencv2/video/tracking.hpp>
-#include "ball_tracker.h"
-#include "../control.h"
+#include "ball_tracker.hpp"
+#include "../game_control/game_control.hpp"
 
 const bool predictKick = true;
 
@@ -267,7 +267,7 @@ void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, u
 
     int calculated_y_pos = foundResult.y;
     //calculated_y_pos = abs(430 - calculated_y_pos);
-    printf("Calculated pos : %d\n", calculated_y_pos);
+    //printf("Calculated pos : %d\n", calculated_y_pos);
     *ball_pos_y = 435 - (calculated_y_pos - 45);
     //calculated_y_pos = (calculated_y_pos) * (FIELD_Y_LENGTH) / 390;
 

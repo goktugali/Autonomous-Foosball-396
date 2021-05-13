@@ -2,11 +2,11 @@
  * Stepper & servo motor driverlarini icerir.
  */
 
-#ifndef MOTOR_DRIVER_H
-#define MOTOR_DRIVER_H
+#ifndef MOTOR_DRIVER_HPP
+#define MOTOR_DRIVER_HPP
 
-#include "../global.h"
-#include "../defines.h"
+#include "../global.hpp"
+#include "../defines.hpp"
 #include <pigpiod_if2.h>
 #include <pthread.h>
 

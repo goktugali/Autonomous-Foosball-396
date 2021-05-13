@@ -2,15 +2,15 @@
  * Global degiskenler ve ilgili metodlari icerir.
  */
 
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef GLOBAL_HPP
+#define GLOBAL_HPP
 
 #include <unistd.h>
 #include <cstdlib>
 #include <cstdio>
 #include <pigpiod_if2.h>
 #include <netinet/in.h>
-#include "defines.h"
+#include "defines.hpp"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -21,7 +21,7 @@ typedef struct __Global_t{
     int                     pi;
     stepper_t               all_steppers[STEPPER_NUM];
 
-    /* game data */
+    /* multicast game data */
     uint16_t                ball_position_x;
     uint16_t                ball_position_y;
     uint16_t                arm_snt_position;
@@ -31,11 +31,14 @@ typedef struct __Global_t{
 
     int                     target_kick_servo;
     int                     ball_not_found;
+    match_data_t            current_match_data;
 
     /* Threads */
     pthread_t               servo_kicker_thread;
     pthread_t               ball_tracker_warning_thread;
     pthread_t               multicast_stream_thread;
+    pthread_t               game_thread;
+    pthread_t               main_server_thread;
 
     /* sync stuff */
     pthread_mutex_t         servo_track_mutex;
@@ -43,13 +46,25 @@ typedef struct __Global_t{
     pthread_mutex_t         ball_info_mutex;
     pthread_mutex_t         ball_warning_mutex;
     pthread_mutex_t         multicast_stream_state_mutex;
+    pthread_mutex_t         game_state_mutex;
+    pthread_mutex_t         servo_kicker_state_mutex;
+    pthread_mutex_t         ball_warning_thread_state_mutex;
+    pthread_mutex_t         db_json_file_mutex;
+    pthread_mutex_t         current_match_data_mutex;
     pthread_cond_t          servo_track_condvar;
     pthread_cond_t          ball_warning_condvar;
 
+    /* state variables */
+    int                     multicast_stream_state;
+    int                     game_play_state;
+    int                     servo_kicker_state;
+    int                     ball_warning_thread_state;
+
     /* Comm stuff */
     int                     multicast_socket_fd;
+    int                     main_server_socket_fd;
     struct sockaddr_in      multicast_addr;
-    int                     multicast_stream_state;
+    struct sockaddr_in      main_server_addr;
 
 }Global_t;
 

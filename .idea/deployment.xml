@@ -2,7 +2,7 @@
 <project version="4">
   <component name="PublishConfigData" serverName="rpi" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="rpi">
+      <paths name="Rpi (3a0fbe1b-4c2c-409a-82a7-46d6a6d00627)">
         <serverdata>
           <mappings>
             <mapping deploy="/home/pi/projects/fball_project" local="$PROJECT_DIR$" />

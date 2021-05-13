@@ -1,4 +1,4 @@
-#include "desktop_comm.h"
+#include "desktop_comm.hpp"
 
 void init_multicast_connection()
 {
@@ -7,11 +7,13 @@ void init_multicast_connection()
         perror("Multicast socket acilamadi :");
         exit(EXIT_FAILURE);
     }
-    memset(&Global.multicast_addr, 0, sizeof(Global.multicast_addr));
+
+    bzero(&Global.multicast_addr, sizeof(Global.multicast_addr));
     Global.multicast_addr.sin_family = AF_INET;
     Global.multicast_addr.sin_addr.s_addr = inet_addr(MULTICAST_GROUP_IP);
     Global.multicast_addr.sin_port = htons(MULTICAST_PORT);
 }
+
 void send_game_data()
 {
     pthread_mutex_lock(&Global.ball_info_mutex);
@@ -36,40 +38,58 @@ void send_game_data()
 int start_multicast_stream()
 {
     pthread_mutex_lock(&Global.multicast_stream_state_mutex);
-    int state = Global.multicast_stream_state;
-    pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
-
-    if(MULTICAST_STATE_STOPPED != state){
+    if(STATE_STOPPED != Global.multicast_stream_state){
+        pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
         return -1;
     }
 
+    init_multicast_connection();
     pthread_create(&Global.multicast_stream_thread, NULL, &multicast_stream_thread_func, NULL);
+    pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
+    return 0;
+}
+
+int stop_multicast_stream()
+{
+    pthread_mutex_lock(&Global.multicast_stream_state_mutex);
+    if(STATE_PLAYING == Global.multicast_stream_state)
+        Global.multicast_stream_state = STATE_STOP_REQUESTED;
+    pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
+
     return 0;
 }
 
 void* multicast_stream_thread_func(void* arg)
 {
     pthread_mutex_lock(&Global.multicast_stream_state_mutex);
-    Global.multicast_stream_state = MULTICAST_STATE_STREAMING;
+    if(STATE_STOPPED == Global.multicast_stream_state)
+        Global.multicast_stream_state = STATE_PLAYING;
     pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
 
+    printf("Multicast stream thread started\n");
     while(true)
     {
+        /* send game data */
+        send_game_data();
+        usleep(DESKTOP_COMM_FREQUENCY);
+
         pthread_mutex_lock(&Global.multicast_stream_state_mutex);
         int state = Global.multicast_stream_state;
         pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
 
         /* Check stream state */
-        if(MULTICAST_STATE_STOP_REQUESTED == state){
+        if(STATE_STOP_REQUESTED == state){
             break;
         }
-
-        /* send game data */
-        send_game_data();
-        usleep(DESKTOP_COMM_FREQUENCY);
     }
 
     pthread_mutex_lock(&Global.multicast_stream_state_mutex);
-    Global.multicast_stream_state = MULTICAST_STATE_STOPPED;
+    Global.multicast_stream_state = STATE_STOPPED;
+
+    // Close socket
+    close(Global.multicast_socket_fd);
+    Global.multicast_socket_fd = -1;
     pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
+
+    printf("Multicast stream thread stopped\n");
 }

@@ -2,8 +2,8 @@
  * Top takibi islemlerini icerir.
  */
 
-#ifndef BALL_TRACKER_H
-#define BALL_TRACKER_H
+#ifndef BALL_TRACKER_HPP
+#define BALL_TRACKER_HPP
 
 #include <iostream>
 #include <opencv2/highgui.hpp>
@@ -11,8 +11,8 @@
 #include <cstdio>
 #include <cmath>
 #include <pthread.h>
-#include "../defines.h"
-#include "../global.h"
+#include "../defines.hpp"
+#include "../global.hpp"
 #include <unistd.h>
 
 using namespace cv;
