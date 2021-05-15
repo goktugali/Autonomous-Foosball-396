@@ -6,6 +6,7 @@
 #include "../motor_driver/motor_driver.hpp"
 #include "../ball_tracker/ball_tracker.hpp"
 #include "../system_control/match_data_utils.hpp"
+#include "../system_control/desktop_comm.hpp"
 #include <pthread.h>
 
 void sort_diff(int16_t* diffs);

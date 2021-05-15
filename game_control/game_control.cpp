@@ -302,17 +302,20 @@ void* game_thread_func(void* arg)
 
     uint16_t ball_x;
     uint16_t ball_y;
+    uint16_t arm_human_snt_pos;
+    uint16_t arm_human_gk_pos;
     uint16_t stepper_pos;
 
     char start_time[24];
     get_current_date_time(start_time);
     set_current_match_start_date(start_time);
     update_current_match_data(0,0);
+    init_multicast_connection();
 
     while(true)
     {
         // Get ball and stepper positions.
-        get_ball_position(&ball_x, &ball_y);
+        get_ball_and_arm_positions(&ball_x, &ball_y, &arm_human_gk_pos, &arm_human_snt_pos);
         stepper_pos = Global.all_steppers[STEPPER_SNT].position;
 
         //printf("Ball pos : %d,%d \n",ball_x, ball_y);
@@ -321,13 +324,16 @@ void* game_thread_func(void* arg)
         //printf("3 : %d\n", stepper_pos + DISTANCE_BETWEEN_KICKERS);
 
         pthread_mutex_lock(&Global.ball_info_mutex);
-        Global.ball_position_x = ball_x;
-        Global.ball_position_y = ball_y;
-        Global.arm_snt_position = stepper_pos / 2;
-        Global.arm_gk_position = Global.arm_snt_position;
+        Global.ball_position_x          = ball_x;
+        Global.ball_position_y          = ball_y;
+        Global.arm_robot_snt_position   = stepper_pos;
+        Global.arm_robot_gk_position    = Global.arm_robot_snt_position;
+        Global.arm_human_gk_position    = arm_human_gk_pos;
+        Global.arm_human_snt_position   = arm_human_snt_pos;
         pthread_mutex_unlock(&Global.ball_info_mutex);
         align_servo_positions(ball_x);
         align_arms(ball_x, ball_y, stepper_pos);
+        send_game_data();
 
         // get game state
         pthread_mutex_lock(&Global.game_state_mutex);
@@ -342,6 +348,8 @@ void* game_thread_func(void* arg)
     Global.game_play_state = STATE_STOPPED;
     printf("Game thread stopped\n");
     pthread_mutex_unlock(&Global.game_state_mutex);
+
+    stop_multicast_stream();
 
     // add new match data in database file.
     pthread_mutex_lock(&Global.current_match_data_mutex);

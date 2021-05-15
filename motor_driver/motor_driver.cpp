@@ -12,7 +12,6 @@ stepper_t init_stepper(int step_pin, int dir_pin)
 
 void generate_ramp(int step_pin, int ramp0, int ramp1)
 {
-
     int wid = -1;
     int f = ramp0;
     int micros = (int)(500000/f);
@@ -49,7 +48,7 @@ void stepper_set_position(stepper_t* step_motor, uint16_t target_pos)
     if(target_pos > step_motor->position)
     {
         int travel_distance = (target_pos- step_motor->position) * STEPPER_POS_MULTIPLIER;
-        int needed_speed    = 5000 + travel_distance * 3;
+        int needed_speed    = 6500 + travel_distance * 2.5;
         stepper_go(step_motor, STEP_DIR_CCW, needed_speed, travel_distance);
     }
     else
@@ -60,7 +59,7 @@ void stepper_set_position(stepper_t* step_motor, uint16_t target_pos)
         }
 
         int travel_distance = (step_motor->position - target_pos) * STEPPER_POS_MULTIPLIER;
-        int needed_speed    = 5000 + travel_distance * 3;
+        int needed_speed    = 6500 + travel_distance * 2.5;
         stepper_go(step_motor, STEP_DIR_CW, needed_speed, travel_distance);
     }
 

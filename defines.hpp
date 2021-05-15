@@ -53,8 +53,8 @@
 #define MULTICAST_GROUP_IP                  "234.5.5.5"
 #define MULTICAST_PORT                      10200
 #define MAIN_SERVER_PORT                    7080
-#define DESKTOP_COMM_FREQUENCY              500000
-#define COMM_DATA_PACKET_SIZE               6  //  = 12byte
+#define DESKTOP_COMM_FREQUENCY              200000
+#define COMM_DATA_PACKET_SIZE               8  //  = 12byte
 #define JSON_DATABASE_FILE_PATH                  "/home/pi/Desktop/database/database.json"
 /************* COMM DEFINES *****************/
 

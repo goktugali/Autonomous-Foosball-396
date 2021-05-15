@@ -24,8 +24,10 @@ typedef struct __Global_t{
     /* multicast game data */
     uint16_t                ball_position_x;
     uint16_t                ball_position_y;
-    uint16_t                arm_snt_position;
-    uint16_t                arm_gk_position;
+    uint16_t                arm_robot_snt_position;
+    uint16_t                arm_robot_gk_position;
+    uint16_t                arm_human_snt_position;
+    uint16_t                arm_human_gk_position;
     uint16_t                robot_score;
     uint16_t                human_score;
 

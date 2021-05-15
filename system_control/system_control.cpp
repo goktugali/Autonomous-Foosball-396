@@ -10,14 +10,6 @@ int start_game_thread()
     }
     pthread_mutex_unlock(&Global.game_state_mutex);
 
-    pthread_mutex_lock(&Global.multicast_stream_state_mutex);
-    if(STATE_STOPPED != Global.multicast_stream_state)
-    {
-        pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
-        return -1;
-    }
-    pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
-
     pthread_mutex_lock(&Global.servo_kicker_state_mutex);
     if(STATE_STOPPED != Global.servo_kicker_state)
     {
@@ -34,7 +26,6 @@ int start_game_thread()
     }
     pthread_mutex_unlock(&Global.ball_warning_thread_state_mutex);
 
-    start_multicast_stream();
     start_servo_kicker_thread();
     start_ball_tracker_warning_thread();
     pthread_create(&Global.game_thread, NULL, &game_thread_func, NULL);
@@ -50,14 +41,6 @@ int stop_game_thread()
         return -1;
     }
     pthread_mutex_unlock(&Global.game_state_mutex);
-
-    pthread_mutex_lock(&Global.multicast_stream_state_mutex);
-    if(STATE_PLAYING != Global.multicast_stream_state)
-    {
-        pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
-        return -1;
-    }
-    pthread_mutex_unlock(&Global.multicast_stream_state_mutex);
 
     pthread_mutex_lock(&Global.servo_kicker_state_mutex);
     if(STATE_PLAYING != Global.servo_kicker_state)
@@ -75,7 +58,6 @@ int stop_game_thread()
     }
     pthread_mutex_unlock(&Global.ball_warning_thread_state_mutex);
 
-    stop_multicast_stream();
     stop_servo_kicker_thread();
     stop_ball_tracker_warning_thread();
 
@@ -123,8 +105,6 @@ void* main_server_thread_func(void* arg)
     memset(&client, 0, sizeof(client));
     socklen_t len = sizeof(client);
 
-    const int response_second = 3;
-
     while(true)
     {
         // accept desktop client
@@ -143,7 +123,7 @@ void* main_server_thread_func(void* arg)
             {
                 printf("Game start requested\n");
                 start_game_thread();
-                sleep(response_second);
+                sleep(RESPONSE_TIME_SEC);
 
                 char response_msg[64];
                 strcpy(response_msg, RESPONSE_OK);
@@ -154,7 +134,7 @@ void* main_server_thread_func(void* arg)
             {
                 printf("Game stop requested\n");
                 stop_game_thread();
-                sleep(response_second);
+                sleep(RESPONSE_TIME_SEC);
 
                 char response_msg[64];
                 strcpy(response_msg, RESPONSE_OK);
@@ -164,14 +144,7 @@ void* main_server_thread_func(void* arg)
             else if(0 == strcmp(message_buffer, CMD_GET_OLD_SCORES)) // GET OLD SCORES COMMAND
             {
                 printf("Old scores requested\n");
-
-                /* Get json file content, send it to client */
-                char json_db_content[4096];
-                get_json_file_content(json_db_content);
-
-                sleep(response_second);
-
-                write(client_fd, json_db_content, strlen(json_db_content));
+                send_old_scores_data(client_fd);
             }
 
             else
@@ -181,4 +154,24 @@ void* main_server_thread_func(void* arg)
         }
         close(client_fd);
     }
+}
+
+void send_old_scores_data(int client_fd)
+{
+    /* Get json file content, send it to client */
+    char json_db_content[4096];
+    get_json_file_content(json_db_content);
+
+    sleep(RESPONSE_TIME_SEC);
+
+    write(client_fd, json_db_content, strlen(json_db_content));
+}
+void set_game_diffuculty_level(const char* set_level_command)
+{
+
+}
+
+void send_OK_response()
+{
+
 }

@@ -17,21 +17,26 @@ cv::KalmanFilter kf(stateSize, measSize, contrSize, type);
 
 cv::Mat state(stateSize, 1, type);  // [x,y,v_x,v_y,w,h]
 cv::Mat meas(measSize, 1, type);    // [z_x,z_y,z_w,z_h]
+
 // Camera Index
 int idx = 0;
 
 // Camera Capture
 cv::VideoCapture cap;
 
-char ch = 0;
 double ticks = 0;
-bool found = false;
+bool ballFound = false;
 int notFoundCount = 0;
 
-cv::Point foundResult;
-cv::Point predictResult;
+cv::Point foundResult_ball;
+cv::Point predictResult_ball;
+vector <int> snt_red_positions(10);
+vector <int> gk_red_positions(10);
 
-//VideoWriter video("/home/pi/Desktop/out.avi",VideoWriter::fourcc('M','J','P','G'),10, Size(640,480),true);
+uint16_t last_pos_human_snt = 0;
+uint16_t last_pos_human_gk = 0;
+
+//ideoWriter video("/home/pi/Desktop/out.avi",VideoWriter::fourcc('M','J','P','G'),10, Size(640,480),true);
 
 int init_camera_params()
 {
@@ -65,7 +70,7 @@ int init_camera_params()
     cap.set(5,30);
     // <<<<< Camera Settings
 }
-void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
+void get_ball_and_arm_positions(uint16_t* ball_pos_x, uint16_t* ball_pos_y, uint16_t* arm_human_gk_position, uint16_t* arm_human_snt_position)
 {
     double precTick = ticks;
     ticks = (double) cv::getTickCount();
@@ -85,7 +90,7 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
     cv::Mat res;
     frame.copyTo( res );
 
-    if (found)
+    if (ballFound)
     {
         // >>>> Matrix A
         kf.transitionMatrix.at<float>(2) = dT;
@@ -102,8 +107,8 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
         cv::Point center;
         center.x = state.at<float>(0);
         center.y = state.at<float>(1);
-        predictResult.x = center.x;
-        predictResult.y = center.y;
+        predictResult_ball.x = center.x;
+        predictResult_ball.y = center.y;
 
         // Todo: think this algorithm.
         if (predictKick)
@@ -136,33 +141,47 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
     // <<<<< HSV conversion
 
     // >>>>> Color Thresholding
-    // Note: change parameters for different colors
-    cv::Mat rangeRes = cv::Mat::zeros(frame.size(), CV_8UC1);
+    cv::Mat rangeRes_ball = cv::Mat::zeros(frame.size(), CV_8UC1);
+    cv::Mat rangeRes_red_arm = cv::Mat::zeros(frame.size(), CV_8UC1);
+
     cv::inRange(frmHsv, cv::Scalar(90, 100, 60),
-                cv::Scalar(120 , 255, 255), rangeRes);
+                cv::Scalar(120 , 255, 255), rangeRes_ball);
+
+    cv::inRange(frmHsv, cv::Scalar(20, 0, 0),
+                cv::Scalar(135 , 225, 255), rangeRes_red_arm);
+    cv::bitwise_not(rangeRes_red_arm, rangeRes_red_arm);
     // <<<<< Color Thresholding
 
     // >>>>> Improving the result
-    cv::erode(rangeRes, rangeRes, cv::Mat(), cv::Point(-1, -1), 2);
-    cv::dilate(rangeRes, rangeRes, cv::Mat(), cv::Point(-1, -1), 2);
+    cv::erode(rangeRes_ball, rangeRes_ball, cv::Mat(), cv::Point(-1, -1), 2);
+    cv::dilate(rangeRes_ball, rangeRes_ball, cv::Mat(), cv::Point(-1, -1), 2);
+
+    cv::erode(rangeRes_red_arm, rangeRes_red_arm, cv::Mat(), cv::Point(-1, -1), 2);
+    cv::dilate(rangeRes_red_arm, rangeRes_red_arm, cv::Mat(), cv::Point(-1, -1), 2);
     // <<<<< Improving the result
 
-    // Thresholding viewing
-    //cv::imshow("Threshold", rangeRes);
-
     // >>>>> Contours detection
-    vector<vector<cv::Point> > contours;
-    cv::findContours(rangeRes, contours, cv::RETR_EXTERNAL,
+    vector<vector<cv::Point> > contours_for_ball;
+    vector<vector<cv::Point> > contours_for_red_arm;
+
+    cv::findContours(rangeRes_ball, contours_for_ball, cv::RETR_EXTERNAL,
                      cv::CHAIN_APPROX_NONE);
+    cv::findContours(rangeRes_red_arm, contours_for_red_arm, cv::RETR_EXTERNAL,
+                     cv::CHAIN_APPROX_NONE);
+
+
     // <<<<< Contours detection
 
     // >>>>> Filtering
-    vector<vector<cv::Point> > balls;
+    vector<vector<cv::Point>> balls;
+    vector<vector<cv::Point>> red_players;
     vector<cv::Rect> ballsBox;
-    for (size_t i = 0; i < contours.size(); i++)
+    vector<cv::Rect> red_player_boxes;
+    // Ball detection drawing
+    for (size_t i = 0; i < contours_for_ball.size(); i++)
     {
         cv::Rect bBox;
-        bBox = cv::boundingRect(contours[i]);
+        bBox = cv::boundingRect(contours_for_ball[i]);
 
         float ratio = (float) bBox.width / (float) bBox.height;
         if (ratio > 1.0f)
@@ -171,13 +190,31 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
         // Searching for a bBox almost square
         if (ratio > 0.75 && bBox.area() >= 400)
         {
-            balls.push_back(contours[i]);
+            balls.push_back(contours_for_ball[i]);
             ballsBox.push_back(bBox);
         }
     }
-    // <<<<< Filtering
 
-    // >>>>> Detection result
+    // Red arm detection drawing.
+    for (size_t i = 0; i < contours_for_red_arm.size(); i++)
+    {
+        cv::Rect bBox;
+        bBox = cv::boundingRect(contours_for_red_arm[i]);
+
+        float ratio = (float) bBox.height / (float) bBox.width;
+
+        // Searching for a bBox almost square
+        if (ratio > 0.2 && ratio < 3)
+        {
+            if (bBox.area() <= 5000 && bBox.area() >= 100)
+            {
+                red_players.push_back(contours_for_red_arm[i]);
+                red_player_boxes.push_back(bBox);
+            }
+        }
+    }
+
+    // >>>>> Ball Detection result
     for (size_t i = 0; i < balls.size(); i++)
     {
         cv::drawContours(res, balls, i, CV_RGB(20,150,20), 1);
@@ -188,8 +225,8 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
         center.y = ballsBox[i].y + ballsBox[i].height / 2;
         cv::circle(res, center, 2, CV_RGB(20,150,20), -1);
 
-        foundResult.x = center.x;
-        foundResult.y = center.y;
+        foundResult_ball.x = center.x;
+        foundResult_ball.y = center.y;
 
         stringstream sstr;
         sstr << "(" << center.x << "," << center.y << ")";
@@ -197,16 +234,52 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
                     cv::Point(center.x + 3, center.y - 3),
                     cv::FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(20,150,20), 2);
     }
-    // <<<<< Detection result
 
-    // >>>>> Kalman Update
+    // >>>>> Red Arm Detection result
+    for (size_t i = 0; i < red_players.size(); i++)
+    {
+        cv::Point center;
+        center.x = red_player_boxes[i].x + red_player_boxes[i].width / 2;
+        center.y = red_player_boxes[i].y + red_player_boxes[i].height / 2;
+
+        // store Red arm GK player positions.
+        if(center.x > 600 && center.x < 610)
+        {
+            gk_red_positions.push_back(center.y);
+            cv::drawContours(res, red_players, i, CV_RGB(20,150,20), 1);
+            cv::rectangle(res, red_player_boxes[i], CV_RGB(0,255,0), 2);
+            cv::circle(res, center, 2, CV_RGB(20,150,20), -1);
+
+            stringstream sstr;
+            sstr << "(" << center.x << "," << center.y << ")";
+            cv::putText(res, sstr.str(),
+                        cv::Point(center.x + 3, center.y - 3),
+                        cv::FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(20,150,20), 2);
+        }
+
+        // store Red arm SNT player positions.
+        if(center.x > 255 && center.x < 265)
+        {
+            snt_red_positions.push_back(center.y);
+            cv::drawContours(res, red_players, i, CV_RGB(20,150,20), 1);
+            cv::rectangle(res, red_player_boxes[i], CV_RGB(0,255,0), 2);
+            cv::circle(res, center, 2, CV_RGB(20,150,20), -1);
+
+            stringstream sstr;
+            sstr << "(" << center.x << "," << center.y << ")";
+            cv::putText(res, sstr.str(),
+                        cv::Point(center.x + 3, center.y - 3),
+                        cv::FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(20,150,20), 2);
+        }
+    }
+
+    // >>>>> Ball detection Kalman Update
     if (balls.size() == 0)
     {
         notFoundCount++;
-        //cout << "notFoundCount:" << notFoundCount << endl;
         if( notFoundCount >= 100 )
         {
-            found = false;
+            ballFound = false;
             pthread_mutex_lock(&Global.ball_warning_mutex);
             Global.ball_not_found = 1;
             pthread_cond_signal(&Global.ball_warning_condvar);
@@ -220,7 +293,7 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
         Global.ball_not_found = 0;
         pthread_mutex_unlock(&Global.ball_warning_mutex);
 
-        // Todo: Handle not found situation. Use global for this state.
+        // Todo: Handle not ballFound situation. Use global for this state.
         notFoundCount = 0;
 
         meas.at<float>(0) = ballsBox[0].x + ballsBox[0].width / 2;
@@ -228,7 +301,7 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
         meas.at<float>(2) = (float)ballsBox[0].width;
         meas.at<float>(3) = (float)ballsBox[0].height;
 
-        if (!found) // First detection!
+        if (!ballFound) // First detection!
         {
             // >>>> Initialization
             kf.errorCovPre.at<float>(0) = 1; // px
@@ -248,49 +321,55 @@ void get_ball_position(uint16_t* ball_pos_x, uint16_t* ball_pos_y)
 
             kf.statePost = state;
 
-            found = true;
+            ballFound = true;
         }
         else
             kf.correct(meas); // Kalman Correction
     }
     //video.write(res);
     // <<<<< Kalman Update
-    normalize_coordinates(foundResult, ball_pos_x, ball_pos_y);
+    normalize_coordinates(foundResult_ball, ball_pos_x, ball_pos_y, arm_human_gk_position, arm_human_snt_position);
 }
-void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, uint16_t* ball_pos_y)
+
+void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, uint16_t* ball_pos_y, uint16_t* arm_human_gk_position , uint16_t* arm_human_snt_position)
 {
-    /*To map
-    [A, B] --> [a, b]
-    [0,390]       --> [0,664]
-    use this formula (val - A)*(b-a)/(B-A) + a
-     */
+    int calculated_y_pos_ball = foundResult_ball.y;
+    *ball_pos_y = 435 - (calculated_y_pos_ball - 45);
 
-    int calculated_y_pos = foundResult.y;
-    //calculated_y_pos = abs(430 - calculated_y_pos);
-    //printf("Calculated pos : %d\n", calculated_y_pos);
-    *ball_pos_y = 435 - (calculated_y_pos - 45);
-    //calculated_y_pos = (calculated_y_pos) * (FIELD_Y_LENGTH) / 390;
-
-
-    /*
-    if(calculated_y_pos < 0)
+    if(gk_red_positions.size() == 3)
     {
-        *ball_pos_y = 0;
-    }
-    else if(calculated_y_pos  > FIELD_Y_LENGTH )
-    {
-        *ball_pos_y = FIELD_Y_LENGTH;
+        printf("Test1...\n");
+        sort(gk_red_positions.begin(), gk_red_positions.end());
+        int calculated_y_pos_human_gk = gk_red_positions.at(1);
+        *arm_human_gk_position = 435 - (calculated_y_pos_human_gk - 45);
+        last_pos_human_gk = *arm_human_gk_position;
     }
     else
     {
-        *ball_pos_y = calculated_y_pos;
+        *arm_human_gk_position = last_pos_human_gk;
     }
-*/
-    int calculated_x_pos = foundResult.x - 11;
+
+    if(snt_red_positions.size() == 3)
+    {
+        printf("Test1...\n");
+        sort(snt_red_positions.begin(), snt_red_positions.end());
+        int calculated_y_pos_human_snt = snt_red_positions.at(1);
+        *arm_human_snt_position = 435 - (calculated_y_pos_human_snt - 45);
+        last_pos_human_snt = *arm_human_snt_position;
+    }
+    else
+    {
+        *arm_human_snt_position = last_pos_human_snt;
+    }
+
+    int calculated_x_pos = foundResult_ball.x - 11;
     if(calculated_x_pos < 0 ){
         *ball_pos_x = 0;
     }
     else{
         *ball_pos_x = calculated_x_pos;
     }
+
+    gk_red_positions.clear();
+    snt_red_positions.clear();
 }

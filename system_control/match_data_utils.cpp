@@ -86,21 +86,18 @@ void delete_first_match_data()
 {
     char database_file_content[1024];
     get_json_file_content(database_file_content);
+    char* content_except_first_match = database_file_content;
 
     match_data_t match_entries[MAX_STORED_MATCH_DATA_SIZE];
     int total_entry_size = 0;
     parse_json_data(database_file_content, match_entries, &total_entry_size);
 
-    if(total_entry_size > MAX_STORED_MATCH_DATA_SIZE)
+    if(total_entry_size >= MAX_STORED_MATCH_DATA_SIZE)
     {
+        strtok_r(content_except_first_match, ";", &content_except_first_match);
         // truncate file and write again.
         int database_file_fd = open(JSON_DATABASE_FILE_PATH, O_RDWR | O_FSYNC | O_TRUNC);
-        for (int i = 1; i < total_entry_size; ++i)
-        {
-            char match_data_str[64];
-            match_data_to_string(&match_entries[i], match_data_str);
-            write(database_file_fd, match_data_str, strlen(match_data_str));
-        }
+        write(database_file_fd, content_except_first_match, strlen(content_except_first_match));
         close(database_file_fd);
     }
 }
