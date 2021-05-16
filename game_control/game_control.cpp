@@ -1,29 +1,13 @@
 #include "game_control.hpp"
-#include <fcntl.h>
 
 void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
 {
-    /* If any goal risk from opponent, go defence position */
-    /*
-    if(ball_x < DEFENCE_POSITON_MAX && ball_x> DEFENCE_POSITION_MIN)
-    {
-        if(ball_y > FIELD_Y_LENGTH)
-            arm_move_sync((FIELD_Y_LENGTH / 2) + 20);
-        else if(ball_y < FIELD_Y_LENGTH)
-            arm_move_sync((FIELD_Y_LENGTH / 2) -  20);
-        else
-            arm_move_sync((FIELD_Y_LENGTH / 2));
-        return;
-    }
-     */
-
     int16_t differences[3];
     uint16_t second_kicker_pos  = stepper_pos;
     uint16_t first_kicker_pos   = stepper_pos - DISTANCE_BETWEEN_KICKERS;
     uint16_t third_kicker_pos   = stepper_pos + DISTANCE_BETWEEN_KICKERS;
 
     uint16_t target_pos;
-    int16_t min_difference;
     int16_t difference_first_kicker     = abs(first_kicker_pos - ball_y);
     int16_t difference_second_kicker    = abs(second_kicker_pos - ball_y);
     int16_t difference_third_kicker     = abs(third_kicker_pos - ball_y);
@@ -300,11 +284,11 @@ void* game_thread_func(void* arg)
     init_camera_params();
     printf("Game thread started\n");
 
-    uint16_t ball_x;
-    uint16_t ball_y;
-    uint16_t arm_human_snt_pos;
-    uint16_t arm_human_gk_pos;
-    uint16_t stepper_pos;
+    uint16_t ball_x             = 0;
+    uint16_t ball_y             = 0;
+    uint16_t arm_human_snt_pos  = 0;
+    uint16_t arm_human_gk_pos   = 0;
+    uint16_t stepper_pos        = 0;
 
     char start_time[24];
     get_current_date_time(start_time);
@@ -323,14 +307,14 @@ void* game_thread_func(void* arg)
         //printf("2 : %d\n", stepper_pos);
         //printf("3 : %d\n", stepper_pos + DISTANCE_BETWEEN_KICKERS);
 
-        pthread_mutex_lock(&Global.ball_info_mutex);
+        /* collect real time game data */
         Global.ball_position_x          = ball_x;
         Global.ball_position_y          = ball_y;
         Global.arm_robot_snt_position   = stepper_pos;
         Global.arm_robot_gk_position    = Global.arm_robot_snt_position;
         Global.arm_human_gk_position    = arm_human_gk_pos;
         Global.arm_human_snt_position   = arm_human_snt_pos;
-        pthread_mutex_unlock(&Global.ball_info_mutex);
+
         align_servo_positions(ball_x);
         align_arms(ball_x, ball_y, stepper_pos);
         send_game_data();

@@ -30,14 +30,13 @@ void global_init()
     /************************* SYNCHRONIZATION STUFF ***********************/
     pthread_mutex_init(&Global.servo_track_mutex, NULL);
     pthread_mutex_init(&Global.servo_snt_mutex, NULL);
-    pthread_mutex_init(&Global.ball_info_mutex, NULL);
     pthread_mutex_init(&Global.ball_warning_mutex, NULL);
-    pthread_mutex_init(&Global.multicast_stream_state_mutex ,NULL);
     pthread_mutex_init(&Global.game_state_mutex, NULL);
     pthread_mutex_init(&Global.servo_kicker_state_mutex, NULL);
     pthread_mutex_init(&Global.ball_warning_thread_state_mutex, NULL);
     pthread_mutex_init(&Global.db_json_file_mutex, NULL);
     pthread_mutex_init(&Global.current_match_data_mutex, NULL);
+
     pthread_cond_init(&Global.servo_track_condvar, NULL);
     pthread_cond_init(&Global.ball_warning_condvar, NULL);
     /************************* SYNCHRONIZATION STUFF ***********************/
@@ -48,7 +47,6 @@ void global_init()
     /************************* NETWORKING STUFF ****************************/
 
     /************************* STATE VARIABLES ****************************/
-    Global.multicast_stream_state       = STATE_STOPPED;
     Global.game_play_state              = STATE_STOPPED;
     Global.servo_kicker_state           = STATE_STOPPED;
     Global.ball_warning_thread_state    = STATE_STOPPED;

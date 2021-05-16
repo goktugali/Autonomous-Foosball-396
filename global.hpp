@@ -38,16 +38,13 @@ typedef struct __Global_t{
     /* Threads */
     pthread_t               servo_kicker_thread;
     pthread_t               ball_tracker_warning_thread;
-    pthread_t               multicast_stream_thread;
     pthread_t               game_thread;
     pthread_t               main_server_thread;
 
     /* sync stuff */
     pthread_mutex_t         servo_track_mutex;
     pthread_mutex_t         servo_snt_mutex;
-    pthread_mutex_t         ball_info_mutex;
     pthread_mutex_t         ball_warning_mutex;
-    pthread_mutex_t         multicast_stream_state_mutex;
     pthread_mutex_t         game_state_mutex;
     pthread_mutex_t         servo_kicker_state_mutex;
     pthread_mutex_t         ball_warning_thread_state_mutex;
@@ -57,7 +54,6 @@ typedef struct __Global_t{
     pthread_cond_t          ball_warning_condvar;
 
     /* state variables */
-    int                     multicast_stream_state;
     int                     game_play_state;
     int                     servo_kicker_state;
     int                     ball_warning_thread_state;

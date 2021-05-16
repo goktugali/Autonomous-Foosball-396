@@ -16,8 +16,6 @@ void init_multicast_connection()
 
 void send_game_data()
 {
-    //pthread_mutex_lock(&Global.ball_info_mutex);
-
     /* fill raw data */
     uint16_t raw_data[COMM_DATA_PACKET_SIZE];
     raw_data[0] = Global.ball_position_x;
@@ -28,8 +26,6 @@ void send_game_data()
     raw_data[5] = Global.arm_human_gk_position;
     raw_data[6] = Global.human_score;
     raw_data[7] = Global.robot_score;
-
-    //pthread_mutex_unlock(&Global.ball_info_mutex);
 
     int nbytes = sendto(Global.multicast_socket_fd, &raw_data, sizeof(raw_data), 0, (struct sockaddr*)(&(Global.multicast_addr)), sizeof(Global.multicast_addr));
     if(nbytes < 0){

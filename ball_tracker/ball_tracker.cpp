@@ -19,7 +19,7 @@ cv::Mat state(stateSize, 1, type);  // [x,y,v_x,v_y,w,h]
 cv::Mat meas(measSize, 1, type);    // [z_x,z_y,z_w,z_h]
 
 // Camera Index
-int idx = 0;
+const int idx = 0;
 
 // Camera Capture
 cv::VideoCapture cap;
@@ -36,7 +36,7 @@ vector <int> gk_red_positions(10);
 uint16_t last_pos_human_snt = 0;
 uint16_t last_pos_human_gk = 0;
 
-//ideoWriter video("/home/pi/Desktop/out.avi",VideoWriter::fourcc('M','J','P','G'),10, Size(640,480),true);
+//VideoWriter video("/home/pi/Desktop/out.avi",VideoWriter::fourcc('M','J','P','G'),10, Size(640,480),true);
 
 int init_camera_params()
 {
@@ -326,6 +326,7 @@ void get_ball_and_arm_positions(uint16_t* ball_pos_x, uint16_t* ball_pos_y, uint
         else
             kf.correct(meas); // Kalman Correction
     }
+
     //video.write(res);
     // <<<<< Kalman Update
     normalize_coordinates(foundResult_ball, ball_pos_x, ball_pos_y, arm_human_gk_position, arm_human_snt_position);
@@ -338,7 +339,6 @@ void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, u
 
     if(gk_red_positions.size() == 3)
     {
-        printf("Test1...\n");
         sort(gk_red_positions.begin(), gk_red_positions.end());
         int calculated_y_pos_human_gk = gk_red_positions.at(1);
         *arm_human_gk_position = 435 - (calculated_y_pos_human_gk - 45);
@@ -351,7 +351,6 @@ void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, u
 
     if(snt_red_positions.size() == 3)
     {
-        printf("Test1...\n");
         sort(snt_red_positions.begin(), snt_red_positions.end());
         int calculated_y_pos_human_snt = snt_red_positions.at(1);
         *arm_human_snt_position = 435 - (calculated_y_pos_human_snt - 45);
