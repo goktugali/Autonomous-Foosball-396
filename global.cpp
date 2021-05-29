@@ -25,6 +25,10 @@ void global_init()
     set_mode(Global.pi, RED_LED_PIN, PI_OUTPUT);
     gpio_write(Global.pi, RED_LED_PIN, PI_HIGH);
 
+    // goal sensor pins
+    set_mode(Global.pi, GOAL_SENSOR_HUMAN, PI_INPUT);
+    set_mode(Global.pi, GOAL_SENSOR_ROBOT, PI_INPUT);
+
     /************************** GPIO PIN INIT *******************************/
 
     /************************* SYNCHRONIZATION STUFF ***********************/

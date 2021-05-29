@@ -12,9 +12,9 @@
 
 /**************** TANIMLAMALAR *****************/
 #define DEGREE_TO_STEPS(x) (6400*x / 360)
-#define STEPPER_SPEED_DEFAULT               6500
+#define STEPPER_SPEED_DEFAULT               7500
 #define STEPPER_POS_MULTIPLIER              50
-#define STEPPER_SPEED_MULTIPLIER            2.5
+#define STEPPER_SPEED_MULTIPLIER            3.0
 #define SERVO_SNT_HOME_POSITION             1400
 #define SERVO_GK_HOME_POSITION              1400
 #define SERVO_KICK_DISTANCE                 700

@@ -17,6 +17,8 @@
 #define SERVO_SNT_SIGNAL_PIN                27
 #define SERVO_GK_SIGNAL_PIN                 22
 #define RED_LED_PIN                         4
+#define GOAL_SENSOR_HUMAN                   5
+#define GOAL_SENSOR_ROBOT                   6
 /************ GPIO PIN DEFINES ***********/
 
 

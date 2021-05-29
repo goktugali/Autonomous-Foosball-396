@@ -27,7 +27,6 @@ void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
         if(differences[i] == difference_first_kicker)
         {
             //printf("En yakin birinci adam \n");
-
             //printf("Birinci adam mesafe : %d\n", differences[i]);
             if(first_kicker_pos < ball_y)
             {
@@ -41,7 +40,6 @@ void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
         }
         else if(differences[i] == difference_second_kicker)
         {
-
             //printf("En yakin ikinci adam \n");
             //printf("ikinci adam mesafe : %d\n", differences[i]);
 
@@ -133,13 +131,19 @@ void* servo_kicker_thread_func(void* arg)
         Global.target_kick_servo = -1;
         pthread_mutex_unlock(&Global.servo_track_mutex);
 
-        if(SERVO_SNT == target_servo){
-            servo_SNT_kick();
-        }
+        pthread_mutex_lock(&Global.ball_warning_mutex);
+        int ball_not_found = Global.ball_not_found;
+        pthread_mutex_unlock(&Global.ball_warning_mutex);
 
-        else if(SERVO_GK == target_servo){
+        // If ball is not found, don't do any kick operation.
+        if(1 == ball_not_found)
+            continue;
+
+        if(SERVO_SNT == target_servo)
+            servo_SNT_kick();
+
+        else if(SERVO_GK == target_servo)
             servo_GK_kick();
-        }
 
         pthread_mutex_lock(&Global.servo_kicker_state_mutex);
         int state = Global.servo_kicker_state;
@@ -296,11 +300,30 @@ void* game_thread_func(void* arg)
     update_current_match_data(0,0);
     init_multicast_connection();
 
+    int goal_handled_human = 0;
+    int goal_handled_robot = 0;
+    int prev_not_found_state = 1;
+    time_t match_start;
+    double elapsed_second = 0;
+
     while(true)
     {
         // Get ball and stepper positions.
         get_ball_and_arm_positions(&ball_x, &ball_y, &arm_human_gk_pos, &arm_human_snt_pos);
         stepper_pos = Global.all_steppers[STEPPER_SNT].position;
+
+        pthread_mutex_lock(&Global.ball_warning_mutex);
+        int ball_not_found = Global.ball_not_found;
+        pthread_mutex_unlock(&Global.ball_warning_mutex);
+
+        if(prev_not_found_state == 1 && ball_not_found == 0)
+        {
+            prev_not_found_state = 0;
+            time(&match_start);
+            printf("Mac basladi.... \n");
+            goal_handled_robot = 0;
+            goal_handled_human = 0;
+        }
 
         //printf("Ball pos : %d,%d \n",ball_x, ball_y);
         //printf("1 : %d\n", stepper_pos - DISTANCE_BETWEEN_KICKERS);
@@ -314,6 +337,45 @@ void* game_thread_func(void* arg)
         Global.arm_robot_gk_position    = Global.arm_robot_snt_position;
         Global.arm_human_gk_position    = arm_human_gk_pos;
         Global.arm_human_snt_position   = arm_human_snt_pos;
+
+        int goal_state_human = gpio_read(Global.pi, GOAL_SENSOR_HUMAN);
+        int goal_state_robot = gpio_read(Global.pi, GOAL_SENSOR_ROBOT);
+
+        if(1 == goal_state_human && !goal_handled_human && 0 == goal_state_robot)
+        {
+            prev_not_found_state = 1;
+            time_t now;
+            time(&now);
+
+            elapsed_second = difftime(now, match_start);
+            printf("Gecen sure : %.0f\n", elapsed_second);
+
+            if(elapsed_second > 5)
+            {
+                Global.robot_score++;
+                printf("Girdi 1....%.0f\n", elapsed_second);
+                elapsed_second = 0;
+            }
+            goal_handled_human = 1;
+        }
+
+        if(1 == goal_state_robot && !goal_handled_robot && 0 == goal_state_human)
+        {
+            prev_not_found_state = 1;
+            time_t now;
+            time(&now);
+
+            elapsed_second = difftime(now, match_start);
+            printf("Gecen sure : %.0f\n", elapsed_second);
+
+            if(elapsed_second > 5 )
+            {
+                Global.human_score++;
+                printf("Girdi 1....%.0f\n", elapsed_second);
+                elapsed_second = 0;
+            }
+            goal_handled_robot = 1;
+        }
 
         align_servo_positions(ball_x);
         align_arms(ball_x, ball_y, stepper_pos);
@@ -336,7 +398,14 @@ void* game_thread_func(void* arg)
     stop_multicast_stream();
 
     // add new match data in database file.
+    // Todo : dosya senkronizasyonuna bakilmali...
+    update_current_match_data(Global.human_score, Global.robot_score);
+
     pthread_mutex_lock(&Global.current_match_data_mutex);
     add_new_match_data(&Global.current_match_data);
     pthread_mutex_unlock(&Global.current_match_data_mutex);
+
+    // Todo : baska seylerin de sifirlanmasi gerekir mi???
+    Global.human_score = 0;
+    Global.robot_score = 0;
 }

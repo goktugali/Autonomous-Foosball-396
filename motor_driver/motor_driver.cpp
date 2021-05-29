@@ -30,7 +30,6 @@ void generate_ramp(int step_pin, int ramp0, int ramp1)
     wave_delete(Global.pi, wid);
 }
 
-
 void stepper_go(const stepper_t* step_motor, STEP_DIRECTON dir, int speed, int steps)
 {
     gpio_write(Global.pi, step_motor->dir_pin, dir);
