@@ -1,5 +1,7 @@
 #include "motor_driver.hpp"
 
+int global_wid = -1; // Goruntu isleme ile step motor surulen versiyon.
+
 stepper_t init_stepper(int step_pin, int dir_pin)
 {
     stepper_t s;
@@ -28,6 +30,25 @@ void generate_ramp(int step_pin, int ramp0, int ramp1)
 
     while(wave_tx_busy(Global.pi));
     wave_delete(Global.pi, wid);
+}
+
+void generate_ramp2(int step_pin, int ramp0, int ramp1)
+{
+    wave_tx_stop(Global.pi);
+    wave_delete(Global.pi, global_wid);
+
+    int f = ramp0;
+    int micros = (int)(500000/f);
+    gpioPulse_t pulses[2] =  {{1 << step_pin, 0, micros},{0, 1 << step_pin,micros}};
+    wave_add_generic(Global.pi, 2, pulses);
+
+    global_wid = wave_create(Global.pi);
+
+    int steps = ramp1;
+    int x = steps & 255;
+    int y = steps >> 8;
+    char wave[7] = {255, 0, global_wid, 255, 1 , x, y};
+    wave_chain(Global.pi, wave , 7);
 }
 
 void stepper_go(const stepper_t* step_motor, STEP_DIRECTON dir, int speed, int steps)

@@ -32,6 +32,9 @@ int init_camera_params();
  */
 void get_ball_and_arm_positions(uint16_t* ball_pos_x, uint16_t* ball_pos_y, uint16_t* arm_human_gk_position, uint16_t* arm_human_snt_position);
 
+/**
+ * Robot kolun konumu icin gorunu isleme kullanir.
+ */
 void get_ball_and_arm_positions2(uint16_t* ball_pos_x, uint16_t* ball_pos_y, uint16_t* arm_human_gk_position, uint16_t* arm_human_snt_position, uint16_t* arm_robot_snt_position);
 
 /**
@@ -39,6 +42,9 @@ void get_ball_and_arm_positions2(uint16_t* ball_pos_x, uint16_t* ball_pos_y, uin
  */
 void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, uint16_t* ball_pos_y, uint16_t* arm_human_gk_position , uint16_t* arm_human_snt_position);
 
+/**
+ * Robot kolun konumu icin gorunu isleme kullanir.
+ */
 void normalize_coordinates2(const cv::Point& resultPoint, uint16_t* ball_pos_x, uint16_t* ball_pos_y, uint16_t* arm_human_gk_position , uint16_t* arm_human_snt_position, uint16_t* arm_robot_snt_position);
 
 #endif

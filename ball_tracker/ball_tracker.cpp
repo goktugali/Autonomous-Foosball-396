@@ -39,7 +39,7 @@ uint16_t last_pos_human_snt = 0;
 uint16_t last_pos_human_gk = 0;
 uint16_t last_pos_robot_snt = 0;
 
-//VideoWriter video("/home/pi/Desktop/out2.avi",VideoWriter::fourcc('M','J','P','G'),10, Size(640,480),true);
+VideoWriter video("/home/pi/Desktop/out2.avi",VideoWriter::fourcc('M','J','P','G'),10, Size(640,480),true);
 
 int init_camera_params()
 {
@@ -557,7 +557,7 @@ void get_ball_and_arm_positions2(uint16_t* ball_pos_x, uint16_t* ball_pos_y, uin
         {
             snt_yellow_positions.push_back(center.y);
             cv::drawContours(res, yellow_players, i, CV_RGB(20,150,20), 1);
-            cv::rectangle(res, yellow_player_boxes[i], CV_RGB(0,255,0), 2);
+            cv::rectangle(res, yellow_player_boxes[i], CV_RGB(255,0,0), 2);
             cv::circle(res, center, 2, CV_RGB(20,150,20), -1);
 
             stringstream sstr;
@@ -622,7 +622,7 @@ void get_ball_and_arm_positions2(uint16_t* ball_pos_x, uint16_t* ball_pos_y, uin
             kf.correct(meas); // Kalman Correction
     }
 
-    //video.write(res);
+    video.write(res);
     // <<<<< Kalman Update
     normalize_coordinates2(foundResult_ball, ball_pos_x, ball_pos_y, arm_human_gk_position, arm_human_snt_position, arm_robot_snt_position);
 }
@@ -700,6 +700,7 @@ void normalize_coordinates2(const cv::Point& resultPoint, uint16_t* ball_pos_x, 
 
     if(snt_yellow_positions.size() == 3)
     {
+        printf("Test goruyor...\n");
         sort(snt_yellow_positions.begin(), snt_yellow_positions.end());
         int calculated_y_pos_robot_snt = snt_yellow_positions.at(1);
         *arm_robot_snt_position = 435 - (calculated_y_pos_robot_snt - 45);
@@ -720,4 +721,5 @@ void normalize_coordinates2(const cv::Point& resultPoint, uint16_t* ball_pos_x, 
 
     gk_red_positions.clear();
     snt_red_positions.clear();
+    snt_yellow_positions.clear();
 }

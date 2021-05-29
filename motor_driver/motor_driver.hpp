@@ -12,9 +12,9 @@
 
 /**************** TANIMLAMALAR *****************/
 #define DEGREE_TO_STEPS(x) (6400*x / 360)
-#define STEPPER_SPEED_DEFAULT               7500
+#define STEPPER_SPEED_DEFAULT               6500
 #define STEPPER_POS_MULTIPLIER              50
-#define STEPPER_SPEED_MULTIPLIER            3.0
+#define STEPPER_SPEED_MULTIPLIER            2.5
 #define SERVO_SNT_HOME_POSITION             1400
 #define SERVO_GK_HOME_POSITION              1400
 #define SERVO_KICK_DISTANCE                 700
@@ -23,6 +23,7 @@
 /********* Alt seviye motor kontrol fonksiyonlari *********/
 stepper_t init_stepper(int step_pin, int dir_pin);
 void generate_ramp(int step_pin, int ramp0, int ramp1);
+void generate_ramp2(int step_pin, int ramp0, int ramp1); // Goruntu isleme ile step motor surulen versiyon.
 void stepper_go(const stepper_t* step_motor, STEP_DIRECTON dir, int speed, int steps);
 void stepper_set_position(stepper_t* step_motor, uint16_t target_pos);
 void stepper_home(stepper_t* step_motor);
