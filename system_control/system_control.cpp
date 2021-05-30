@@ -105,7 +105,7 @@ void* main_server_thread_func(void* arg)
     memset(&client, 0, sizeof(client));
     socklen_t len = sizeof(client);
 
-    while(true)
+    while(STATE_PLAYING == Global.main_server_thread_state)
     {
         // accept desktop client
         int client_fd = accept(Global.main_server_socket_fd, (struct sockaddr*)&client, &len);
@@ -125,9 +125,7 @@ void* main_server_thread_func(void* arg)
                 start_game_thread();
                 sleep(RESPONSE_TIME_SEC);
 
-                char response_msg[64];
-                strcpy(response_msg, RESPONSE_OK);
-                write(client_fd, response_msg, strlen(response_msg));
+                send_OK_response(client_fd);
             }
 
             else if(0 == strcmp(message_buffer, CMD_STOP_GAME)) // STOP GAME COMMAND
@@ -136,9 +134,7 @@ void* main_server_thread_func(void* arg)
                 stop_game_thread();
                 sleep(RESPONSE_TIME_SEC);
 
-                char response_msg[64];
-                strcpy(response_msg, RESPONSE_OK);
-                write(client_fd, response_msg, strlen(response_msg));
+                send_OK_response(client_fd);
             }
 
             else if(0 == strcmp(message_buffer, CMD_GET_OLD_SCORES)) // GET OLD SCORES COMMAND
@@ -159,8 +155,10 @@ void* main_server_thread_func(void* arg)
 void send_old_scores_data(int client_fd)
 {
     /* Get json file content, send it to client */
+    pthread_mutex_lock(&Global.db_json_file_mutex);
     char json_db_content[4096];
     get_json_file_content(json_db_content);
+    pthread_mutex_unlock(&Global.db_json_file_mutex);
 
     sleep(RESPONSE_TIME_SEC);
 
@@ -171,7 +169,9 @@ void set_game_diffuculty_level(const char* set_level_command)
 
 }
 
-void send_OK_response()
+void send_OK_response(int client_fd)
 {
-
+    char response_msg[64];
+    strcpy(response_msg, RESPONSE_OK);
+    write(client_fd, response_msg, strlen(response_msg));
 }

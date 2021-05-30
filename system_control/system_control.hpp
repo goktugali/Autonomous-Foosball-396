@@ -37,7 +37,7 @@ void set_game_diffuculty_level(const char* set_level_command);
 /**
  * Sends OK response to the client.
  */
-void send_OK_response();
+void send_OK_response(int client_fd);
 
 /**
  * Initializes the main server connection (sockets.)

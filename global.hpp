@@ -49,7 +49,6 @@ typedef struct __Global_t{
     pthread_mutex_t         servo_kicker_state_mutex;
     pthread_mutex_t         ball_warning_thread_state_mutex;
     pthread_mutex_t         db_json_file_mutex;
-    pthread_mutex_t         current_match_data_mutex;
     pthread_cond_t          servo_track_condvar;
     pthread_cond_t          ball_warning_condvar;
 
@@ -57,6 +56,7 @@ typedef struct __Global_t{
     int                     game_play_state;
     int                     servo_kicker_state;
     int                     ball_warning_thread_state;
+    int                     main_server_thread_state;
 
     /* Comm stuff */
     int                     multicast_socket_fd;

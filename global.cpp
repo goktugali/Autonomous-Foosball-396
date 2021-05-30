@@ -39,7 +39,6 @@ void global_init()
     pthread_mutex_init(&Global.servo_kicker_state_mutex, NULL);
     pthread_mutex_init(&Global.ball_warning_thread_state_mutex, NULL);
     pthread_mutex_init(&Global.db_json_file_mutex, NULL);
-    pthread_mutex_init(&Global.current_match_data_mutex, NULL);
 
     pthread_cond_init(&Global.servo_track_condvar, NULL);
     pthread_cond_init(&Global.ball_warning_condvar, NULL);
@@ -54,6 +53,7 @@ void global_init()
     Global.game_play_state              = STATE_STOPPED;
     Global.servo_kicker_state           = STATE_STOPPED;
     Global.ball_warning_thread_state    = STATE_STOPPED;
+    Global.main_server_thread_state     = STATE_PLAYING;
     /************************* STATE VARIABLES ****************************/
 
     /************************* OTHER VARIABLES ******************************/

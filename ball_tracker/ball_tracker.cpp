@@ -39,7 +39,7 @@ uint16_t last_pos_human_snt = 0;
 uint16_t last_pos_human_gk = 0;
 uint16_t last_pos_robot_snt = 0;
 
-VideoWriter video("/home/pi/Desktop/out2.avi",VideoWriter::fourcc('M','J','P','G'),10, Size(640,480),true);
+//VideoWriter video("/home/pi/Desktop/out2.avi",VideoWriter::fourcc('M','J','P','G'),10, Size(640,480),true);
 
 int init_camera_params()
 {
@@ -622,7 +622,7 @@ void get_ball_and_arm_positions2(uint16_t* ball_pos_x, uint16_t* ball_pos_y, uin
             kf.correct(meas); // Kalman Correction
     }
 
-    video.write(res);
+    //video.write(res);
     // <<<<< Kalman Update
     normalize_coordinates2(foundResult_ball, ball_pos_x, ball_pos_y, arm_human_gk_position, arm_human_snt_position, arm_robot_snt_position);
 }
@@ -631,7 +631,7 @@ void normalize_coordinates(const cv::Point& resultPoint, uint16_t* ball_pos_x, u
 {
     int calculated_y_pos_ball = foundResult_ball.y;
     *ball_pos_y = 435 - (calculated_y_pos_ball - 45);
-
+    // pokinlab
     if(gk_red_positions.size() == 3)
     {
         sort(gk_red_positions.begin(), gk_red_positions.end());

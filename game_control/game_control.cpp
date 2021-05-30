@@ -18,16 +18,10 @@ void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
 
     /* sort the differences */
     sort_diff(differences);
-    //printf("Motor pos : %d\n", stepper_pos);
-    //printf("Birinci adam konum : %d\n", first_kicker_pos);
-    //printf("ikinci adam konum : %d\n", second_kicker_pos);
-    //printf("ucuncu adam konum : %d\n", third_kicker_pos);
     for (int i = 0; i < 3; ++i)
     {
         if(differences[i] == difference_first_kicker)
         {
-            //printf("En yakin birinci adam \n");
-            //printf("Birinci adam mesafe : %d\n", differences[i]);
             if(first_kicker_pos < ball_y)
             {
                 target_pos = second_kicker_pos + differences[i];
@@ -40,9 +34,6 @@ void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
         }
         else if(differences[i] == difference_second_kicker)
         {
-            //printf("En yakin ikinci adam \n");
-            //printf("ikinci adam mesafe : %d\n", differences[i]);
-
             if(second_kicker_pos < ball_y)
             {
                 target_pos = second_kicker_pos + differences[i];
@@ -54,9 +45,6 @@ void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
         }
         else if(differences[i] == difference_third_kicker)
         {
-            //printf("En yakin ucuncu adam \n");
-            //printf("ucuncu adam mesafe : %d\n", differences[i]);
-
             if(third_kicker_pos < ball_y)
             {
                 target_pos = second_kicker_pos + differences[i];
@@ -68,7 +56,6 @@ void align_arms(uint16_t ball_x, uint16_t ball_y, uint16_t stepper_pos)
         }
 
         if(target_pos > STEPPER_MIN_POSITION && target_pos < STEPPER_MAX_POSITION) {
-            //printf("Hareket komutu gonderildi %d \n", target_pos);
             arm_move_sync(target_pos);
             break;
         }
@@ -397,15 +384,11 @@ void* game_thread_func(void* arg)
 
     stop_multicast_stream();
 
-    // add new match data in database file.
-    // Todo : dosya senkronizasyonuna bakilmali...
     update_current_match_data(Global.human_score, Global.robot_score);
-
-    pthread_mutex_lock(&Global.current_match_data_mutex);
+    pthread_mutex_lock(&Global.db_json_file_mutex);
     add_new_match_data(&Global.current_match_data);
-    pthread_mutex_unlock(&Global.current_match_data_mutex);
+    pthread_mutex_unlock(&Global.db_json_file_mutex);
 
-    // Todo : baska seylerin de sifirlanmasi gerekir mi???
     Global.human_score = 0;
     Global.robot_score = 0;
 }

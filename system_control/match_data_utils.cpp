@@ -104,19 +104,15 @@ void delete_first_match_data()
 
 void update_current_match_data(uint16_t human_score, uint16_t robot_score)
 {
-    pthread_mutex_lock(&Global.current_match_data_mutex);
     memset(Global.current_match_data.human_score, 0, sizeof(Global.current_match_data.human_score));
     memset(Global.current_match_data.robot_score, 0, sizeof(Global.current_match_data.robot_score));
     sprintf(Global.current_match_data.human_score, "%d", human_score);
     sprintf(Global.current_match_data.robot_score, "%d", robot_score);
-    pthread_mutex_unlock(&Global.current_match_data_mutex);
 }
 
 void set_current_match_start_date(const char* str_time)
 {
-    pthread_mutex_lock(&Global.current_match_data_mutex);
     memset(Global.current_match_data.date, 0 , sizeof(Global.current_match_data));
     sprintf(Global.current_match_data.date, "%s", str_time);
-    pthread_mutex_unlock(&Global.current_match_data_mutex);
 }
 
