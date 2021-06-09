@@ -119,12 +119,45 @@ void* main_server_thread_func(void* arg)
             // null terminate the request string
             message_buffer[readed_byte] = '\0';
 
-            if(0 == strcmp(message_buffer, CMD_START_GAME)) // START GAME COMMAND
+            if(0 == strcmp(message_buffer, CMD_START_GAME_EASY)) // START EASY GAME COMMAND
             {
                 printf("Game start requested\n");
+
+                /** set game speed **/
+                Global.stepper_speed_default            = GAME_SPEED_STEPPER_EASY;
+                Global.stepper_speed_multiplier_default = GAME_SPEED_MULTIPLIER_EASY;
+                /** set game speed **/
+
                 start_game_thread();
                 sleep(RESPONSE_TIME_SEC);
+                send_OK_response(client_fd);
+            }
 
+            else if(0 == strcmp(message_buffer, CMD_START_GAME_MEDIUM)) // START GAME MEDIUM COMMAND
+            {
+                printf("Game start requested\n");
+
+                /** set game speed **/
+                Global.stepper_speed_default            = GAME_SPEED_STEPPER_MEDIUM;
+                Global.stepper_speed_multiplier_default = GAME_SPEED_MULTIPLIER_MEDIUM;
+                /** set game speed **/
+
+                start_game_thread();
+                sleep(RESPONSE_TIME_SEC);
+                send_OK_response(client_fd);
+            }
+
+            else if(0 == strcmp(message_buffer, CMD_START_GAME_HARD)) // START GAME HARD COMMAND
+            {
+                printf("Game start requested\n");
+
+                /** set game speed **/
+                Global.stepper_speed_default            = GAME_SPEED_STEPPER_HARD;
+                Global.stepper_speed_multiplier_default = GAME_SPEED_MULTIPLIER_HARD;
+                /** set game speed **/
+
+                start_game_thread();
+                sleep(RESPONSE_TIME_SEC);
                 send_OK_response(client_fd);
             }
 
@@ -145,7 +178,7 @@ void* main_server_thread_func(void* arg)
 
             else
             {
-                // unknown command
+                printf("Unknown command : %s\n", message_buffer);
             }
         }
         close(client_fd);

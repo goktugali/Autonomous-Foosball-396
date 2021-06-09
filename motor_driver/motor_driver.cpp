@@ -68,7 +68,7 @@ void stepper_set_position(stepper_t* step_motor, uint16_t target_pos)
     if(target_pos > step_motor->position)
     {
         int travel_distance = (target_pos- step_motor->position) * STEPPER_POS_MULTIPLIER;
-        int needed_speed    = STEPPER_SPEED_DEFAULT + travel_distance * STEPPER_SPEED_MULTIPLIER;
+        int needed_speed    = Global.stepper_speed_default + travel_distance * Global.stepper_speed_multiplier_default;
         stepper_go(step_motor, STEP_DIR_CCW, needed_speed, travel_distance);
     }
     else
@@ -79,7 +79,7 @@ void stepper_set_position(stepper_t* step_motor, uint16_t target_pos)
         }
 
         int travel_distance = (step_motor->position - target_pos) * STEPPER_POS_MULTIPLIER;
-        int needed_speed    = STEPPER_SPEED_DEFAULT + travel_distance * STEPPER_SPEED_MULTIPLIER;
+        int needed_speed    = Global.stepper_speed_default + travel_distance * Global.stepper_speed_multiplier_default;
         stepper_go(step_motor, STEP_DIR_CW, needed_speed, travel_distance);
     }
 

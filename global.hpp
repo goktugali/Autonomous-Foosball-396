@@ -64,6 +64,10 @@ typedef struct __Global_t{
     struct sockaddr_in      multicast_addr;
     struct sockaddr_in      main_server_addr;
 
+    /* game variables */
+    int                     stepper_speed_default;
+    double                  stepper_speed_multiplier_default;
+
 }Global_t;
 
 /**

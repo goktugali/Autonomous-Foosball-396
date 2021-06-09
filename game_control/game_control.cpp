@@ -109,18 +109,28 @@ void* servo_kicker_thread_func(void* arg)
     while(true)
     {
         pthread_mutex_lock(&Global.servo_track_mutex);
-        if(-1 == Global.target_kick_servo)
+        if(-1 == Global.target_kick_servo) {
+            printf("Uyuyor.... %d\n",Global.target_kick_servo);
             pthread_cond_wait(&Global.servo_track_condvar, &Global.servo_track_mutex);
+        }
 
         int target_servo = Global.target_kick_servo;
 
         // Mark as kick operation done.
         Global.target_kick_servo = -1;
+        printf("Uyandı....%d\n", Global.target_kick_servo);
         pthread_mutex_unlock(&Global.servo_track_mutex);
 
         pthread_mutex_lock(&Global.ball_warning_mutex);
         int ball_not_found = Global.ball_not_found;
         pthread_mutex_unlock(&Global.ball_warning_mutex);
+
+        pthread_mutex_lock(&Global.servo_kicker_state_mutex);
+        int state = Global.servo_kicker_state;
+        pthread_mutex_unlock(&Global.servo_kicker_state_mutex);
+
+        if(STATE_STOP_REQUESTED == state)
+            break;
 
         // If ball is not found, don't do any kick operation.
         if(1 == ball_not_found)
@@ -131,13 +141,6 @@ void* servo_kicker_thread_func(void* arg)
 
         else if(SERVO_GK == target_servo)
             servo_GK_kick();
-
-        pthread_mutex_lock(&Global.servo_kicker_state_mutex);
-        int state = Global.servo_kicker_state;
-        pthread_mutex_unlock(&Global.servo_kicker_state_mutex);
-
-        if(STATE_STOP_REQUESTED == state)
-            break;
     }
 
     pthread_mutex_lock(&Global.servo_kicker_state_mutex);
@@ -155,8 +158,10 @@ int start_servo_kicker_thread()
 int stop_servo_kicker_thread()
 {
     pthread_mutex_lock(&Global.servo_kicker_state_mutex);
-    if(STATE_PLAYING == Global.servo_kicker_state)
+    if(STATE_PLAYING == Global.servo_kicker_state) {
+        printf("Stop request atıldı\n");
         Global.servo_kicker_state = STATE_STOP_REQUESTED;
+    }
     pthread_mutex_unlock(&Global.servo_kicker_state_mutex);
 
     pthread_mutex_lock(&Global.servo_track_mutex);

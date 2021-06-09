@@ -41,6 +41,16 @@
 #define JSON_DATABASE_FILE_PATH             "/home/pi/Desktop/database/database.json"
 /*************** COMM DEFINES ********************/
 
+
+/*************** GAME DEFINES *********************/
+#define GAME_SPEED_STEPPER_EASY             4500
+#define GAME_SPEED_MULTIPLIER_EASY          1
+
+#define GAME_SPEED_STEPPER_MEDIUM           5000
+#define GAME_SPEED_MULTIPLIER_MEDIUM        1.5
+
+#define GAME_SPEED_STEPPER_HARD             6500
+#define GAME_SPEED_MULTIPLIER_HARD          2.5
 /*************** TYPE DEFINES *******************/
 
 /* Step Motor Struct */

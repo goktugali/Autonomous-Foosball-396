@@ -57,7 +57,9 @@ void global_init()
     /************************* STATE VARIABLES ****************************/
 
     /************************* OTHER VARIABLES ******************************/
-    Global.target_kick_servo = -1;
-    Global.ball_not_found    = 1;
+    Global.target_kick_servo                = -1;
+    Global.ball_not_found                   = 1;
+    Global.stepper_speed_default            = GAME_SPEED_STEPPER_MEDIUM;
+    Global.stepper_speed_multiplier_default = GAME_SPEED_MULTIPLIER_MEDIUM;
     /************************* OTHER VARIABLES ******************************/
 }

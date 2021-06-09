@@ -9,12 +9,11 @@
  *
  */
 
-#define CMD_START_GAME 			"cmd_start_game"
-#define CMD_STOP_GAME  			"cmd_stop_game"
-#define CMD_GET_OLD_SCORES 		"cmd_get_old_scores"
-#define CMD_SET_LEVEL_EASY      "cmd_set_level_easy"
-#define CMD_SET_LEVEL_MEDIUM    "cmd_set_level_medium"
-#define CMD_SET_LEVEL_HARD      "cmd_set_level_hard"
-#define RESPONSE_OK             "OK"
+#define CMD_START_GAME_EASY 			"cmd_start_game_easy"
+#define CMD_START_GAME_MEDIUM			"cmd_start_game_medium"
+#define CMD_START_GAME_HARD			    "cmd_start_game_hard"
+#define CMD_STOP_GAME  			        "cmd_stop_game"
+#define CMD_GET_OLD_SCORES 		        "cmd_get_old_scores"
+#define RESPONSE_OK                     "OK"
 
 #endif
