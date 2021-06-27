@@ -110,7 +110,6 @@ void* servo_kicker_thread_func(void* arg)
     {
         pthread_mutex_lock(&Global.servo_track_mutex);
         if(-1 == Global.target_kick_servo) {
-            printf("Uyuyor.... %d\n",Global.target_kick_servo);
             pthread_cond_wait(&Global.servo_track_condvar, &Global.servo_track_mutex);
         }
 
@@ -118,7 +117,6 @@ void* servo_kicker_thread_func(void* arg)
 
         // Mark as kick operation done.
         Global.target_kick_servo = -1;
-        printf("Uyandı....%d\n", Global.target_kick_servo);
         pthread_mutex_unlock(&Global.servo_track_mutex);
 
         pthread_mutex_lock(&Global.ball_warning_mutex);

@@ -10,6 +10,7 @@ void handler_sigint(int signo)
 
 int main()
 {
+    sleep(10);
     global_init();
 
     /* setup the SIGINT handler */

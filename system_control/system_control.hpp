@@ -42,7 +42,7 @@ void send_OK_response(int client_fd);
 /**
  * Initializes the main server connection (sockets.)
  */
-void init_main_server_connection();
+int init_main_server_connection();
 
 /**
  * Starts the main server as a different thread.

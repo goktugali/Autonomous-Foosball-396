@@ -67,34 +67,46 @@ int stop_game_thread()
     return 0;
 }
 
-void init_main_server_connection()
+int init_main_server_connection()
 {
     Global.main_server_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if(-1 == Global.main_server_socket_fd){
         perror("Main server socket acilamadi.");
-        exit(EXIT_FAILURE);
+        return -1;
     }
 
     // assign IP, PORT
     bzero(&Global.main_server_addr, sizeof(Global.main_server_addr));
-    Global.main_server_addr.sin_family 		= AF_INET;
+    Global.main_server_addr.sin_family 		    = AF_INET;
     Global.main_server_addr.sin_addr.s_addr 	= htonl(INADDR_ANY);
     Global.main_server_addr.sin_port 			= htons(MAIN_SERVER_PORT);
 
     // Binding newly created socket to given IP and verification
     if ((bind(Global.main_server_socket_fd, (struct sockaddr*)&Global.main_server_addr, sizeof(Global.main_server_addr))) != 0) {
         perror("socket bind failed...");
-        exit(EXIT_FAILURE);
+        close(Global.main_server_socket_fd);
+        return -1;
     }
 
     if ((listen(Global.main_server_socket_fd, 5)) != 0) {
         perror("Listen failed...");
-        exit(EXIT_FAILURE);
+        close(Global.main_server_socket_fd);
+        return -1;
     }
+
+
+    return 0;
 }
 void start_main_server_thread()
 {
-    init_main_server_connection();
+    /* wait until network is available */
+    int s_state = -1;
+    while(-1 == s_state)
+    {
+        s_state = init_main_server_connection();
+        sleep(1);
+    }
+
     pthread_create(&Global.main_server_thread, NULL, &main_server_thread_func, NULL);
 }
 
